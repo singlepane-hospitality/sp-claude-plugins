@@ -1,6 +1,6 @@
 ---
 name: singlepane-excel-modeling
-description: Build Excel financial models, reports, and dashboards for hotel portfolios using the Singlepane Excel add-in's SP.* custom functions (SP.FINANCIALS, SP.FINANCIALS_AGG, SP.STR, SP.OTB, SP.FILTER, and more). Use this skill whenever the user mentions Singlepane, SP. functions, hotel P&L / USALI accounts, budgets/forecasts/reforecasts, STR or comp-set index data, on-the-books/pace data, flow-through, or wants to build or modify an Excel workbook that pulls hotel portfolio data — even if they don't name the add-in explicitly, and whether the workbook should be live/refreshable (SP.* formulas) or a one-time static export (values via the Singlepane MCP connector). Also use it when reviewing or debugging a workbook that already contains SP.* formulas, or when retrofitting/converting an existing model or report — one built on pasted exports, hardcoded values, or data-tab lookups — to live Singlepane formulas.
+description: Build Excel financial models, reports, and dashboards for hotel portfolios using the Singlepane Excel add-in's SP.* custom functions (SP.FINANCIALS, SP.FINANCIALS_AGG, SP.STR, SP.OTB, SP.FILTER, and more). Use this skill whenever the user mentions Singlepane, SP. functions, hotel P&L / USALI accounts, budgets/forecasts/reforecasts, STR or comp-set index data, on-the-books/pace data, guest review scores/counts or review comp sets, flow-through, or wants to build or modify an Excel workbook that pulls hotel portfolio data — even if they don't name the add-in explicitly, and whether the workbook should be live/refreshable (SP.* formulas) or a one-time static export (values via the Singlepane MCP connector). Also use it when reviewing or debugging a workbook that already contains SP.* formulas, or when retrofitting/converting an existing model or report — one built on pasted exports, hardcoded values, or data-tab lookups — to live Singlepane formulas.
 ---
 
 # Building Excel models with the Singlepane add-in
@@ -92,10 +92,11 @@ lists are fine only when the user names specific properties.
    This is what makes a model auditable and repointable — change one cell, the whole
    report follows.
 4. **Write the formulas** per the reference below, referencing the input cells.
-5. **Leave room for spills**: array functions (SP.FILTER, SP.GET_HOTEL_REFERENCE, the
-   dashboard functions) spill down/right and include a header row. Anything in the way
-   causes `#SPILL!`. Put each on its own sheet or in a clear region, and reference the
-   spill with `#` notation (e.g. `A1#`) or structured formulas.
+5. **Leave room for spills**: array functions (SP.FILTER, the comp-set spills, the
+   reference spills) spill down/right; SP.FILTER and the reference spills include a
+   header row, the comp-set spills don't. Anything in the way causes `#SPILL!`. Put
+   each on its own sheet or in a clear region, and reference the spill with `#`
+   notation (e.g. `A1#`) or structured formulas.
 6. **Hand off**: remind the user to sign in and recalculate. If they'll share the file
    with someone without add-in access, point them to the task pane's **Convert To
    Values** ("zap") — it irreversibly replaces every SP.* formula with its value, so save
@@ -112,17 +113,22 @@ cells are fine):
 | `SP.FINANCIALS_AGG(codes, usali, month, year, version)` | Same, summed over a range/array of codes — accepts a nested `SP.FILTER(...)` |
 | `SP.STR(code, date, aggType, metric, [subjCompMkt], [segment])` | STR performance & comp-set indexes |
 | `SP.OTB(code, dailyOrMonthly, stayDate, targetSet, periodType, metric, segment, [asOfDate])` | On-the-books / pace |
+| `SP.REVIEWS(code, startDate, endDate, source, subjectCs, metric)` | Guest review metrics over a date range (count, avg rating, response rate, star buckets) |
+| `SP.REVIEWS_SUMMARY(code, source, asOfDate, subjectCs, metric)` | Site-lifetime review totals & TripAdvisor market rank, as of a scrape date |
 | `SP.GET_INTEREST_RATE(benchmark, date, [asOfDate])` | SOFR / SONIA / T10YR benchmark rate (as a percent) |
 
-Array functions (spill with a header row):
+Array functions (spill; SP.FILTER and the reference spills include a header row — the
+comp-set spills don't, so write your own labels above them):
 
 | Function | Purpose |
 |---|---|
 | `SP.FILTER([codes], filter1, value1, …, [filter5], [value5])` | Property codes matching up to 5 attribute filters |
+| `SP.STR_COMP_SET(code, [asOfDate], [compset])` | Member hotels + room counts of an STR comp set |
+| `SP.REVIEWS_COMP_SET(code, [source], [asOfDate])` | Review comp set table: name, review count, rating, TripAdvisor rank, market |
 | `SP.GET_HOTEL_REFERENCE()` | All authorized hotels × all attributes (the "My Properties" sheet) |
 | `SP.GET_USALI_REFERENCE()` | All USALI account lines (the "Usali Reference" sheet) |
 
-**These eight are the only SP.* functions to use.** The add-in exposes other functions
+**These twelve are the only SP.* functions to use.** The add-in exposes other functions
 (dashboard spills like `SP.REV_GOP_EBITDA` or `SP.RISK_UPSIDE`, helpers like
 `SP.GET_HOTEL_ATTRIBUTE`) — they are legacy/undocumented and must not appear in new
 models. Need a hotel attribute like room count? `XLOOKUP` it from the "My Properties"
@@ -159,7 +165,7 @@ reports, debt schedules), see
 
 - **Dates**: pass `"YYYY-MM-DD"` strings or reference a cell containing a real Excel
   date; both work. For monthly OTB data use the first of the month.
-- **Months** (FINANCIALS/dashboard functions): 3-letter abbreviations, `"Jan"`…`"Dec"`.
+- **Months** (FINANCIALS/FINANCIALS_AGG): 3-letter abbreviations, `"Jan"`…`"Dec"`.
   SP.FINANCIALS also accepts aggregations: `"Total Year"`, `"Q1"`–`"Q4"`, `"JunYTD"`,
   `"JunTTM"`, `"AugBOY"` (month+suffix, no space).
 - **Year**: 4-digit number, unquoted.
@@ -168,11 +174,14 @@ reports, debt schedules), see
   company-specific reforecast names). Prefer letting the backend compute variances via
   the `Var_*` versions when the user asks for variance columns, but computing variance
   in Excel from two SP.FINANCIALS cells is also fine and more transparent.
-- **Missing data returns 0, not blank**, for FINANCIALS/FINANCIALS_AGG/STR/OTB. Design
-  accordingly (e.g. guard ratio formulas against divide-by-zero with `IFERROR`).
+- **Missing data returns 0, not blank**, for FINANCIALS/FINANCIALS_AGG/STR/OTB/
+  REVIEWS/REVIEWS_SUMMARY. Design accordingly (e.g. guard ratio formulas against
+  divide-by-zero with `IFERROR`). Exception: SP.REVIEWS_COMP_SET spills blank cells
+  for metrics it doesn't have.
 - A cell showing `#N/A` with message **"Not authorized"** means the user isn't signed
   in — not that the formula is wrong. `"No Data"` / `"No data"` from array functions
-  means the query matched nothing.
+  means the query matched nothing (the comp-set spills instead error `#N/A` with
+  "No STR comp set found" / "No review comp set found" when the set isn't configured).
 
 ## Building workbooks programmatically
 

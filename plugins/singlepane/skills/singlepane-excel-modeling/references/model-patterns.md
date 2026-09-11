@@ -99,6 +99,32 @@ Properties" — `=XLOOKUP($B$1,'My Properties'!A:A,'My Properties'!M:M)` (column
 Rooms) — and divide by that cell. KPI recipes (Occ %, ADR, RevPAR, PAR/POR stats) are
 in [usali-layouts.md](usali-layouts.md).
 
+## 8. Guest review scorecard
+
+Two blocks. Top: the comp set comparison — one spill, subject first, members
+alphabetical, with your own header row typed above it:
+
+```
+A5:  =SP.REVIEWS_COMP_SET($B$1,$B$2,$B$3)     // B2 source (blank = all), B3 as-of
+```
+
+(columns spill as name · review count · avg rating · TA rank · rank of · market —
+missing metrics are blank, ranks populate only when source is blank/tripadvisor.com).
+
+Below: monthly trend rows (month-start dates) for the subject —
+
+```
+Reviews:   =SP.REVIEWS($B$1,$A20,EOMONTH($A20,0),$B$2,"subject","review_count")
+Rating:    =SP.REVIEWS($B$1,$A20,EOMONTH($A20,0),$B$2,"subject","avg_rating")
+Response:  =SP.REVIEWS($B$1,$A20,EOMONTH($A20,0),$B$2,"subject","response_rate")
+```
+
+Add a `"cs"` twin column per metric to compare against the pooled comp set. For
+lifetime totals as of month-end (review growth month over month), use
+`=SP.REVIEWS_SUMMARY($B$1,$B$2,EOMONTH($A20,0),"subject","review_count")` and
+difference consecutive rows. Ratings are on a 5-point scale; format `response_rate`
+as a percent.
+
 ## Finishing touches
 
 - Number formats: currency with no decimals for revenue/GOP/EBITDA, one decimal for

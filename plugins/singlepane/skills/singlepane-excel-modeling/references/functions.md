@@ -14,10 +14,14 @@ workbook, leave them alone but don't propagate them. Build everything from:
 
 1. `SP.FINANCIALS` / `SP.FINANCIALS_AGG` — financial data
 2. `SP.FILTER` — property-code selection
-3. `SP.STR` — STR comp-set data
+3. `SP.STR` / `SP.STR_COMP_SET` — STR comp-set data & set composition
 4. `SP.OTB` — on-the-books / pace
-5. `SP.GET_INTEREST_RATE` — benchmark rates
-6. `SP.GET_HOTEL_REFERENCE` / `SP.GET_USALI_REFERENCE` — reference spills
+5. `SP.REVIEWS` / `SP.REVIEWS_SUMMARY` / `SP.REVIEWS_COMP_SET` — guest reviews
+6. `SP.GET_INTEREST_RATE` — benchmark rates
+7. `SP.GET_HOTEL_REFERENCE` / `SP.GET_USALI_REFERENCE` — reference spills
+
+The review functions and comp-set spills require add-in **v2.1.026 or later** — if a
+user's workbook errors on them, have them update the add-in first.
 
 ---
 
@@ -116,7 +120,28 @@ Note on indexes: MPI/ARI/RGI are already subject-vs-compset ratios, so requestin
 index for `CS1`–`CS5` returns the index computed against that comp set. Occ/ADR/RevPAR
 with `CS1`–`CS5` return the comp set's own performance.
 
-## 5. SP.OTB(code, dailyOrMonthly, stayDate, targetSet, periodType, metric, segment, [asOfDate])
+## 5. SP.STR_COMP_SET(code, [as_of_date], [compset]) — spills
+
+The membership of one STR competitive set: one row per member hotel, two columns
+(hotel name, rooms), **no header row** — write your own labels in the row above the
+spill. The subject property appears as a member of its own set (that's how it's
+reported in the STR file).
+
+| Arg | Valid values |
+|---|---|
+| code | Property code |
+| as_of_date (optional) | Blank/omitted = latest composition. A date returns the composition in effect as of that date (most recent STR report on or before it) — useful next to a historical SP.STR grid, since set membership changes over time |
+| compset (optional) | `CS1`–`CS5` (or a bare group number). Blank/omitted = CS1 |
+
+```excel
+=SP.STR_COMP_SET($B$1)                    // current primary comp set
+=SP.STR_COMP_SET($B$1,$B$2,"CS2")         // CS2 as of the report date in B2
+```
+
+Errors with `No STR comp set found` (`#N/A`) when the property has no set with that
+number. Not batched (one backend call per spill), cached like the scalar functions.
+
+## 6. SP.OTB(code, dailyOrMonthly, stayDate, targetSet, periodType, metric, segment, [asOfDate])
 
 Reservation / pace data for stay dates as of a booking snapshot date.
 
@@ -139,7 +164,80 @@ Reservation / pace data for stay dates as of a booking snapshot date.
 Pace = ty vs ly at the same as-of offset: build both columns and difference them.
 Metric availability can vary with the property's data subscriptions.
 
-## 6. SP.GET_INTEREST_RATE(benchmark_rate, date, [as_of_date])
+## 7. SP.REVIEWS(code, start_date, end_date, source, subject_cs, metric)
+
+Guest review metrics computed over the individual reviews **posted in a date range**
+(both endpoints inclusive). Returns a scalar (0 if no data). Review data exists only
+for properties (and review comp sets) with review scraping configured in Singlepane —
+a hotel that's never been set up returns 0, not an error.
+
+| Arg | Valid values |
+|---|---|
+| code | Property code |
+| start_date / end_date | `"YYYY-MM-DD"` or Excel dates; range includes both days |
+| source | `booking.com`, `expedia.com`, `google.com`, `tripadvisor.com` (case-insensitive, the `.com` optional). Blank = all sources combined |
+| subject_cs | `"subject"` (the property — the default when blank) or `"cs"` (pooled across the property's review comp set members, subject excluded) |
+| metric | `review_count` · `avg_rating` (5-point scale — Booking/Expedia 10-point ratings are normalized) · `response_rate` (fraction 0–1 of reviews with a management reply) · `1_star_count`…`5_star_count` (rating rounded to the nearest whole star) |
+
+```excel
+=SP.REVIEWS($B$1,$A6,EOMONTH($A6,0),$B$2,"subject",C$4)      // monthly grid row
+=SP.REVIEWS("ACD","2026-08-01","2026-08-31","google.com","subject","avg_rating")
+```
+
+All six argument slots must be present — leave `source`/`subject_cs` blank (empty
+input cell, or a skipped slot like `,,`) for the defaults. The review comp set is
+configured in Singlepane's guest-review module and is **not** the STR comp set.
+
+## 8. SP.REVIEWS_SUMMARY(code, source, as_of_date, subject_cs, metric)
+
+**Site-lifetime** review totals as the review sites themselves display them, captured
+by Singlepane's periodic scrapes. Use this for "how many Google reviews / what's our
+TripAdvisor rating today (or as of month-end)"; use SP.REVIEWS for "reviews received
+in August". Returns a scalar (0 if unavailable).
+
+| Arg | Valid values |
+|---|---|
+| code | Property code |
+| source | Same values as SP.REVIEWS; blank = pooled across sources |
+| as_of_date | Blank = latest scrape; a date uses the latest scrape on or before it (per hotel × source). Put it in an input cell for reproducible month-over-month comparisons |
+| subject_cs | `"subject"` (default) / `"cs"` (comp set members pooled, subject excluded) |
+| metric | `review_count` (summed) · `avg_rating` (count-weighted across sources/members, 5-point scale) · TripAdvisor market-ranking snapshot: `ranking`, `ranking_out_of`, `geo_location_name` (returns text) — these three are subject-only and need source blank or `tripadvisor.com`, otherwise 0 |
+
+```excel
+=SP.REVIEWS_SUMMARY($B$1,$B$2,$B$3,"subject","review_count")
+=SP.REVIEWS_SUMMARY($B$1,,,"subject","ranking")     // current TA market rank
+```
+
+All five argument slots must be present; blanks take the defaults above.
+
+## 9. SP.REVIEWS_COMP_SET(code, [source], [as_of_date]) — spills
+
+The property's review comp set as a ready-made comparison table: the subject hotel
+first, then each member alphabetically. Six columns, **no header row** (write your
+own labels above the spill): hotel name · review count · avg rating · TripAdvisor
+ranking · rank out of · market name.
+
+| Arg | Valid values |
+|---|---|
+| code | Property code |
+| source (optional) | Same values as SP.REVIEWS. Blank/omitted = pooled across all sources |
+| as_of_date (optional) | Blank/omitted = latest scrape; else latest scrape on or before the date |
+
+```excel
+=SP.REVIEWS_COMP_SET($B$1)
+=SP.REVIEWS_COMP_SET($B$1,"tripadvisor.com",$B$2)
+```
+
+Values follow SP.REVIEWS_SUMMARY semantics (site-lifetime totals, count-weighted
+pooling, 5-point scale). The two ranking columns and the market name are TripAdvisor
+data: populated when source is blank or `tripadvisor.com`, blank otherwise. Missing
+metrics spill as **blank cells**, not zeros. Only display names are returned — member
+property codes are never exposed (demo logins see masked competitor names) — so key
+any lookups off this spill by hotel name. Errors with `No review comp set found`
+(`#N/A`) when the property has no review comp set configured. Not batched, cached
+like the scalar functions.
+
+## 10. SP.GET_INTEREST_RATE(benchmark_rate, date, [as_of_date])
 
 Percent rate for a benchmark on a date (forward-curve values for future dates).
 
@@ -156,7 +254,7 @@ Percent rate for a benchmark on a date (forward-curve values for future dates).
 Returned as a percent (e.g. `5.33` = 5.33%) — divide by 100 before using in interest
 calculations, and verify scale against a known value on first use.
 
-## 7. Reference spills
+## 11. Reference spills
 
 ### SP.GET_HOTEL_REFERENCE() — spills
 Every authorized hotel × every attribute. This is what populates the auto-created
@@ -190,10 +288,12 @@ dropdown on a USALI input cell.
 
 ## Caching & batching
 
-- FINANCIALS, FINANCIALS_AGG, STR, OTB, and FILTER batch all concurrent cell calls into
-  one backend request (100 ms window) and cache results for up to 12 hours — large
-  models recalc fast; a grid of thousands of SP.FINANCIALS cells is a normal, supported
-  design.
+- FINANCIALS, FINANCIALS_AGG, STR, OTB, REVIEWS, REVIEWS_SUMMARY, and FILTER batch all
+  concurrent cell calls into one backend request (100 ms window) and cache results for
+  up to 12 hours — large models recalc fast; a grid of thousands of SP.FINANCIALS
+  cells is a normal, supported design.
+- The comp-set spills (STR_COMP_SET, REVIEWS_COMP_SET) are not batched — one backend
+  call per spill — but cache for 12 hours like the scalars.
 - Reference spills cache for the whole session; GET_INTEREST_RATE is never cached.
 - The task pane's **Clear Cached Data** + **Recalculate All Functions** force a full
   refresh.
