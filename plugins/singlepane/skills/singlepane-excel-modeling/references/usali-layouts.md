@@ -34,6 +34,7 @@ The ` - NNN` suffix encodes the USALI department:
 | 200 | Food & Beverage (all outlets consolidated) |
 | 201–225 | Individual F&B outlets (see the F&B Outlets section; 212 = Minibar, reported under Other Operated; 220 is unused) |
 | 300 | Other Operated Departments (total) |
+| 305 | Casino |
 | 310 | Health Club/Spa |
 | 320 | Parking |
 | 330 | Recreation |
@@ -69,14 +70,14 @@ read just the file(s) for the view being built — never all of them.
 | Consolidated F&B | [layouts/consolidated-fb.md](layouts/consolidated-fb.md) | 133 |
 | F&B Outlets (per-outlet template) | [layouts/fb-outlets.md](layouts/fb-outlets.md) | 163 |
 | F&B Revenue Details | [layouts/fb-revenue-details.md](layouts/fb-revenue-details.md) | 560 |
-| Other Operated Dpt. | [layouts/other-op-dpt.md](layouts/other-op-dpt.md) | 99 |
+| Other Operated Dpt. | [layouts/other-op-dpt.md](layouts/other-op-dpt.md) | 102 |
 | Misc. Income | [layouts/misc-income.md](layouts/misc-income.md) | 18 |
 | A&G | [layouts/a-g.md](layouts/a-g.md) | 93 |
 | I&T | [layouts/i-t.md](layouts/i-t.md) | 96 |
 | S&M | [layouts/s-m.md](layouts/s-m.md) | 93 |
 | R&M | [layouts/r-m.md](layouts/r-m.md) | 90 |
 | Utilities | [layouts/utilities.md](layouts/utilities.md) | 28 |
-| Non-Operating | [layouts/non-operating.md](layouts/non-operating.md) | 25 |
+| Non-Operating | [layouts/non-operating.md](layouts/non-operating.md) | 33 |
 | Labor | [layouts/labor.md](layouts/labor.md) | 102 |
 
 ## Choosing the right view

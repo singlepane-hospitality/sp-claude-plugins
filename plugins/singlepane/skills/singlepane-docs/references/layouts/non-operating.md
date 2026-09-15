@@ -9,7 +9,15 @@ Departments 900 (non-operating income & expenses), 920 (management fees), 910 (i
 | Row label | USALI string (exact) | Notes |
 |---|---|---|
 | **NON-OPERATING INCOME AND EXPENSES** | — | SECTION HEADER |
-| Non-operating Income | `Total Non-Operating Income - 900` |  |
+| Interest Income | `Interest Income - 900` |  |
+| Other Income | `Other Income - 900` |  |
+| Lease Income | `Lease Income - 900` |  |
+| Cost Recovery Income | `Cost Recovery Income - 900` |  |
+| Lease Income #2 | `Lease Income #2 - 900` |  |
+| Lease Income #3 | `Lease Income #3 - 900` |  |
+| Lease Income #4 | `Lease Income #4 - 900` |  |
+| Lease Income #5 | `Lease Income #5 - 900` |  |
+| Non-operating Income | `Total Non-Operating Income - 900` | bold/subtotal |
 | **RENTAL & LEASES** | — | SECTION HEADER |
 | Land & Buildings | `Land & Buildings - 900` |  |
 | Other Property & Equipment | `Other Property & Equipment - 900` |  |

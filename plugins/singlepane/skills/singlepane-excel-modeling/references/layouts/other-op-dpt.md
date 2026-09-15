@@ -11,6 +11,7 @@ Departments 300-series (plus Minibar, which is numbered 212). Revenue / expense 
 | **OTHER OPERATED DEPARTMENTS REVENUE** | — | SECTION HEADER |
 | Health Club/Spa | `Total Health Club/Spa Revenue - 310` |  |
 | Golf Course & Pro Shop | `Total Golf Course & Pro Shop Revenue - 390` |  |
+| Casino | `Total Casino Revenue - 305` |  |
 | Parking | `Total Parking Revenue - 320` |  |
 | Recreation | `Total Recreation Revenue - 330` |  |
 | Retail | `Total Retail Revenue - 340` |  |
@@ -23,6 +24,7 @@ Departments 300-series (plus Minibar, which is numbered 212). Revenue / expense 
 | **OTHER OPERATED DEPARTMENTS EXPENSE** | — | SECTION HEADER |
 | Health Club/Spa | `Total Departmental Expenses - 310` |  |
 | Golf Course & Pro Shop | `Total Departmental Expenses - 390` |  |
+| Casino | `Total Departmental Expenses - 305` |  |
 | Parking | `Total Departmental Expenses - 320` |  |
 | Recreation | `Total Departmental Expenses - 330` |  |
 | Retail | `Total Departmental Expenses - 340` |  |
@@ -35,6 +37,7 @@ Departments 300-series (plus Minibar, which is numbered 212). Revenue / expense 
 | **OTHER OPERATED DEPARTMENTS PROFIT** | — | SECTION HEADER |
 | Health Club/Spa | `Dept Profit - 310` |  |
 | Golf Course & Pro Shop | `Dept Profit - 390` |  |
+| Casino | `Dept Profit - 305` |  |
 | Parking | `Dept Profit - 320` |  |
 | Recreation | `Dept Profit - 330` |  |
 | Retail | `Dept Profit - 340` |  |
