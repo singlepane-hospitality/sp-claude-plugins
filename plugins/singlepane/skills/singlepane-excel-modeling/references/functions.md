@@ -177,7 +177,7 @@ a hotel that's never been set up returns 0, not an error.
 | start_date / end_date | `"YYYY-MM-DD"` or Excel dates; range includes both days |
 | source | `booking.com`, `expedia.com`, `google.com`, `tripadvisor.com` (case-insensitive, the `.com` optional). Blank = all sources combined |
 | subject_cs | `"subject"` (the property — the default when blank) or `"cs"` (pooled across the property's review comp set members, subject excluded) |
-| metric | `review_count` · `avg_rating` (5-point scale — Booking/Expedia 10-point ratings are normalized) · `response_rate` (fraction 0–1 of reviews with a management reply) · `1_star_count`…`5_star_count` (rating rounded to the nearest whole star) |
+| metric | `review_count` · `avg_rating` (5-point scale — Booking/Expedia 10-point ratings are normalized) · `response_rate` (fraction 0–1 of reviews with a management reply) · `1_star_count`…`5_star_count` (rating rounded to the nearest whole star) · TripAdvisor sub-rating averages `avg_cleanliness`, `avg_location`, `avg_service`, `avg_sleep_quality`, `avg_value` (only TripAdvisor reviews carry sub-ratings, so these average the TripAdvisor reviews in range whatever the source argument; 0 if none) |
 
 ```excel
 =SP.REVIEWS($B$1,$A6,EOMONTH($A6,0),$B$2,"subject",C$4)      // monthly grid row
