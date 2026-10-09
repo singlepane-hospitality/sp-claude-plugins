@@ -63,9 +63,10 @@ so org admins deploy the plugin from a zip instead. No GitHub account is needed.
 3. In the plugin's row menu choose **Default access** and pick **Installed by default**
    (members can turn it off) or **Required** (they can't). **Available to install** lists
    it under Discover for members to opt in.
-4. Under **Organization settings → Connectors**, add the Singlepane connector
-   (`https://ai.singlepaneapp.com/mcp`) so members can connect it with their own
-   Singlepane login. Plugin availability alone doesn't add the bundled connector.
+4. Done. The Singlepane connector is bundled in the plugin and shows on its
+   **Connectors** tab after upload; members connect it with their own Singlepane
+   login. To manage it centrally, or if members can't see it, it can also be added
+   under **Organization settings → Connectors** (`https://ai.singlepaneapp.com/mcp`).
 
 Members get the plugin in chat and Cowork, and in Claude Code sessions signed in with
 their claude.ai account (synced plugins, Claude Code 2.1.273+).
