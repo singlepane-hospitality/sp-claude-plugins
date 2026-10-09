@@ -1,0 +1,81 @@
+name: Release plugin builds
+
+# On every push to main that touches the plugin, build the distributable artifacts and publish them:
+#   - a versioned release  v<ver>   holding singlepane-<ver>.zip (immutable; what the hosted
+#                                   marketplace.json points at, sha256-pinned)
+#   - the rolling release  latest   holding singlepane.zip, marketplace.json and the .skill files
+#                                   (stable URLs for org admins and the website)
+# Bump "version" in plugins/singlepane/.claude-plugin/plugin.json with every plugin change;
+# the job fails if v<ver> already exists with different contents.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "plugins/**"
+      - ".claude-plugin/marketplace.json"
+      - "scripts/build-release.sh"
+      - ".github/workflows/release.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REPO: ${{ github.repository }}
+      GUIDE: https://www.singlepaneapp.com/resources/installing-singlepane-for-claude/
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build artifacts
+        run: scripts/build-release.sh
+
+      - name: Publish versioned release
+        run: |
+          VER="$(jq -r .version plugins/singlepane/.claude-plugin/plugin.json)"
+          ZIP="dist/singlepane-$VER.zip"
+          NEW_SHA="$(sha256sum "$ZIP" | cut -d' ' -f1)"
+          if gh release view "v$VER" >/dev/null 2>&1; then
+            mkdir -p /tmp/existing
+            gh release download "v$VER" --pattern "singlepane-$VER.zip" --dir /tmp/existing --clobber
+            OLD_SHA="$(sha256sum "/tmp/existing/singlepane-$VER.zip" | cut -d' ' -f1)"
+            if [ "$OLD_SHA" != "$NEW_SHA" ]; then
+              echo "::error::Release v$VER already exists with different contents. Bump \"version\" in plugins/singlepane/.claude-plugin/plugin.json and push again."
+              exit 1
+            fi
+            echo "v$VER is already published and unchanged."
+          else
+            NOTES="$(printf '%s\n' \
+              "Singlepane for Claude plugin, version $VER." \
+              "" \
+              "- Org admins (Team/Enterprise): upload singlepane-$VER.zip under Organization settings > Plugins & skills > Add > Upload a plugin." \
+              "- Claude Code managed settings: this zip is the archive source in https://github.com/$REPO/releases/download/latest/marketplace.json" \
+              "- Install guide: $GUIDE" \
+              "" \
+              "sha256: $NEW_SHA")"
+            gh release create "v$VER" "$ZIP" --title "singlepane $VER" --notes "$NOTES"
+          fi
+
+      - name: Update rolling "latest" release
+        run: |
+          VER="$(jq -r .version plugins/singlepane/.claude-plugin/plugin.json)"
+          NOTES="$(printf '%s\n' \
+            "Rolling builds, replaced on every merge to main. Current plugin version: $VER." \
+            "" \
+            "- singlepane.zip: org admins upload this (Organization settings > Plugins & skills > Add > Upload a plugin)" \
+            "- marketplace.json: hosted catalog for Claude Code managed settings (url marketplace source; archive plugin source, sha256-pinned)" \
+            "- *.skill: individual skills for claude.ai / Claude for Excel, Word and PowerPoint skill uploads" \
+            "" \
+            "Install guide: $GUIDE")"
+          gh release view latest >/dev/null 2>&1 || \
+            gh release create latest --title "Latest builds" --notes "$NOTES"
+          gh release upload latest dist/singlepane.zip dist/marketplace.json dist/*.skill --clobber
+          gh release edit latest --title "Latest builds" --notes "$NOTES"
