@@ -8,26 +8,33 @@ The UI generates this tab dynamically, one outlet department at a time, from a s
 template: every account is the same line item with the outlet's department number as the
 suffix. In the table below `{dept}` is the outlet department number — substitute `201`,
 `202`, etc. to get the exact string (e.g. `Total Revenue - {dept}` → `Total Revenue - 201`).
-Outlet departments and their standard names:
+
+**Outlets are positional, not concepts.** Operators book their outlets to these departments
+by position, so most of them are generic "Outlet N" slots whose meaning differs by hotel —
+one hotel's Outlet 1 (201) is its lobby bar, another's is a steakhouse. A hotel's real outlet
+names and aliases come from the `get_fb_outlets` tool: when the user names an outlet ("the
+lobby bar", "Bourbon Steak", "Outlet 3"), call it first and take the dept number from its
+result — never infer the dept from what the outlet is. Generic outlet departments:
 
 | Dept | Outlet | Dept | Outlet |
 |---|---|---|---|
-| 201 | Restaurant | 202 | Bar |
-| 203 | Fine Dining | 204 | Market |
-| 205 | Pool Bar | 206 | Local Restaurant |
-| 207 | Rooftop | 208 | Misc. Outlet 1 |
-| 209 | Executive Lounge | 210 | Misc. Outlet 2 |
-| 211 | Room Service | 213 | Banquets |
-| 214 | Catering | 215 | Convention Services |
-| 216 | F&B Overhead | 217 | Non-Departemental F&B |
-| 218 | Other Restaurant | 219 | Leased Restaurant |
-| 221 | Other Restaurant #1 | 222 | Other Restaurant #2 |
-| 223 | Other Restaurant #3 | 224 | Cafe |
-| 225 | Market #2 |  |  |
+| 201 | Outlet 1 | 202 | Outlet 2 |
+| 203 | Outlet 3 | 204 | Outlet 4 |
+| 205 | Outlet 5 | 206 | Outlet 6 |
+| 207 | Outlet 7 | 208 | Outlet 8 |
+| 209 | Outlet 9 | 210 | Outlet 10 |
+| 217 | Outlet 11 | 218 | Outlet 12 |
+| 219 | Outlet 13 | 221 | Outlet 14 |
+| 222 | Outlet 15 | 223 | Outlet 16 |
+| 224 | Outlet 17 | 225 | Outlet 18 |
 
-(212 = Minibar also exists but is reported on the Other Operated Dpt. tab; 220 is unused.
-Not every account exists for every outlet — rows below note the exceptions. A missing
-account for a given outlet simply returns no data.)
+The fixed-meaning departments keep their names at every hotel: 211 Room Service,
+213 Banquets, 214 Catering, 215 Convention Services, 216 F&B Overhead.
+
+(212 = Minibar also exists but is reported on the Other Operated Dpt. tab; 200 is
+consolidated F&B and 220 a rollup — neither is an outlet. Not every account exists for every
+outlet — rows below note the exceptions. A missing account for a given outlet simply returns
+no data.)
 
 | Row label | USALI string (exact) | Notes |
 |---|---|---|
