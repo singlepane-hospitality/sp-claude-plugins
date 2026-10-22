@@ -43,7 +43,7 @@ The ` - NNN` suffix encodes the USALI department:
 |---|---|
 | 100 | Rooms |
 | 200 | Food & Beverage (all outlets consolidated) |
-| 201–225 | Individual F&B outlets (see the F&B Outlets section; 212 = Minibar, reported under Other Operated; 220 is unused) |
+| 201–225 | Individual F&B outlets — mostly positional "Outlet N" slots whose meaning differs by hotel (see F&B Outlets under Choosing the right view; 212 = Minibar, reported under Other Operated; 220 is a rollup, not an outlet) |
 | 300 | Other Operated Departments (total) |
 | 305 | Casino |
 | 310 | Health Club/Spa |
@@ -103,6 +103,15 @@ read just the file(s) for the view being built — never all of them.
   expense line.
 - **F&B Outlets** (template, depts 201+) gives a full P&L for one outlet; **F&B
   Revenue Details** lists revenue lines for all outlets at once.
+- **F&B outlet depts are positional, not concepts.** Outlet 1–10 = 201–210, 11–13 =
+  217–219, 14–18 = 221–225: 201 is "Outlet 1" at every hotel, but one hotel's Outlet 1
+  is its lobby bar and another's a steakhouse. When the user names an outlet ("the lobby
+  bar", "Bourbon Steak"), resolve it with the Singlepane MCP connector's `get_fb_outlets`
+  tool (hotel code + the name as `search`) and use the returned dept suffix
+  (`usali_suffix`, e.g. ` - 203`) — never pick a dept from the outlet's concept; without
+  the connector, ask the user which outlet number it is. Label the outlet with the hotel's
+  name (`display_label`), not the generic "Outlet N". 211 Room Service, 213 Banquets,
+  214 Catering, 215 Convention Services and 216 F&B Overhead mean the same at every hotel.
 - **Labor** is the property-wide labor cost and hours view (000-level totals with
   per-department breakdown, including 940 House Laundry and 950 Staff Dining).
 - When you only need a top-line number (Total Revenue, GOP, EBITDA, NOI), use the

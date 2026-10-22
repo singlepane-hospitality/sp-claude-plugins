@@ -169,6 +169,14 @@ query variables.
 Top-line numbers (Total Revenue, GOP, EBITDA, NOI) come from `- 000` accounts —
 don't sum departments yourself.
 
+**Named F&B outlets:** outlet depts 201–225 are positional ("Outlet 1" = 201 at every
+hotel), not concepts, so a hotel's lobby bar or steakhouse can sit in any of them. When
+the user names an outlet, look up its dept with the Singlepane MCP connector's
+`get_fb_outlets` tool (hotel code, plus the name as `search`) and append the returned
+`usali_suffix` to the `fb-outlets.md` account names (e.g. `Total Revenue - 203`); label it
+with the tool's `display_label`. Never infer the dept from the outlet's concept; without
+the connector, ask the user.
+
 ## Typical deck patterns
 
 - **Monthly performance one-pager / snapshot slide**: globals `Hotel Code`, `Month`,

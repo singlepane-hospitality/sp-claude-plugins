@@ -157,6 +157,13 @@ views you aren't building wastes significant time. When a user asks for a "P&L",
 "summary", or a department schedule, start from the matching layout file instead of
 inventing a row list.
 
+**Named F&B outlets:** outlet depts 201–225 are positional ("Outlet 1" = 201 at every
+hotel), not concepts, so a hotel's lobby bar or steakhouse can sit in any of them. When
+the user names an outlet, look up its dept with the Singlepane MCP connector's
+`get_fb_outlets` tool (hotel code, plus the name as `search`) and append the returned
+`usali_suffix` to the `fb-outlets.md` account names (e.g. `"Total Revenue - 203"`). Never
+infer the dept from the outlet's concept; without the connector, ask the user.
+
 For complete model shapes (variance reports, portfolio rollups, STR dashboards, pace
 reports, debt schedules), see
 [references/model-patterns.md](references/model-patterns.md).
