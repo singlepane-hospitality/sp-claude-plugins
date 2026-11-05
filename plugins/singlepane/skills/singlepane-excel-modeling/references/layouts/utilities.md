@@ -21,6 +21,7 @@ Department 810 — utilities expense plus consumption stats (note the three cons
 | Total Energy Expense | `Total Energy Expense - 810` | bold/subtotal |
 | Water | `Water & Sewer - 810` |  |
 | Sewer | `Sewer - 810` |  |
+| Municipal Water | `Municipal Water - 810` |  |
 | Other Water | `Other Water - 810` |  |
 | Total Water & Sewer | `Total Water and Sewer Expenses - 810` | bold/subtotal |
 | Landfill or Incineration | `Landfill or Incineration - 810` |  |

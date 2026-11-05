@@ -87,7 +87,7 @@ read just the file(s) for the view being built — never all of them.
 | I&T | [layouts/i-t.md](layouts/i-t.md) | 96 |
 | S&M | [layouts/s-m.md](layouts/s-m.md) | 93 |
 | R&M | [layouts/r-m.md](layouts/r-m.md) | 90 |
-| Utilities | [layouts/utilities.md](layouts/utilities.md) | 28 |
+| Utilities | [layouts/utilities.md](layouts/utilities.md) | 29 |
 | Non-Operating | [layouts/non-operating.md](layouts/non-operating.md) | 33 |
 | Labor | [layouts/labor.md](layouts/labor.md) | 102 |
 
