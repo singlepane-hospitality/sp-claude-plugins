@@ -23,7 +23,7 @@ for the whole app (`07-hasura-rebuild.md`).
 |---|---|---|---|
 | C0 | sp-core | *Prerequisite, not agent work:* PR 114 switch and cleanup applied and merged | — |
 | H1 | sp-core | Metadata generator with explicit function permissions, exposure matrix, per-role schema comparison, runbook (`07` §4, §9) | — |
-| H2 | Hasura | *Austin:* the check in `07` §2; the new project and its environment; event trigger rehearsal on copies | H1 |
+| H2 | Hasura | *Austin:* the new project and its environment; event trigger rehearsal on copies | H1 |
 | H3 | Hasura | *Austin, with the scripts:* generated metadata applied to the new project; parity proven (`07` §5) | H2 |
 | H4 | every caller | Endpoint cutover, one small PR per repo, in the order of `07` §7.1 | H3 |
 | H5 | Hasura | *Austin:* event trigger switch; retire the old project | H4 |
@@ -49,8 +49,8 @@ for the whole app (`07-hasura-rebuild.md`).
 C3b, C3c, C4, C5, C6 can proceed in parallel after C3a, in separate branches. They touch different
 functions; the shared file is the planner's Hasura script (append-only entries).
 H packages run alongside and block no planner package: planner functions are tracked with explicit
-permissions that work on the current API and on the new one (README A14). If the check in
-`07-hasura-rebuild.md` §2 fails, U1 and every later UI package that writes also depends on H4.
+permissions that work on the current API and on the new one (confirmed 2026-11-18,
+`07-hasura-rebuild.md` §2).
 H1 can start immediately.
 
 A usable first release is C1–C4 with U0–U4: monthly expenses and labor, chart of accounts,

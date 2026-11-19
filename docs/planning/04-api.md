@@ -22,10 +22,9 @@ deviation in the PR description.
   and an explicit permission for role `user`, the way `acquisitions.upsert_deal_model_scenario`
   is tracked today. The app is moving to a new Hasura where every function carries its
   permissions explicitly (decision D25, `07-hasura-rebuild.md`); the planner's entries are the
-  same on the current API and the new one, so they are written once (§1.3). `database/README.md`
-  says the current API cannot expose a volatile function to a non-admin role; the live metadata
-  shows it can when the permission is explicit, and `07-hasura-rebuild.md` §2 has the check that
-  settles it. The fallback if that check fails is a command table (§1.4).
+  same on the current API and the new one, so they are written once (§1.3). The current API
+  exposes a volatile function to `user` when the permission is explicit in the metadata;
+  confirmed by test on 2026-11-18 (`07-hasura-rebuild.md` §2).
 - A signature below marked `-- mutation` is a VOLATILE function tracked with
   `exposed_as: mutation`, returning `SETOF` its `_rt` table. The text after the semicolon is the
   action it checks with `planning.can`.
@@ -139,23 +138,7 @@ function-permission inference off (`07-hasura-rebuild.md`).
 - **No database login of its own.** Planner functions run under the connection the app API
   already uses, like every tracked function.
 - **Which API is live does not matter to the planner.** Its packages ship on the current API if
-  the new one is not live yet and move with everything else at cutover (README A14). If the
-  check in `07-hasura-rebuild.md` §2 fails, UI packages that write wait for the new API or use §1.4.
-
-### 1.4 Fallback: command table
-
-Use this only if the check in `07-hasura-rebuild.md` §2 fails **and** the new API is not live when
-the first write has to ship. The same functions can then be reached without any tracked mutation:
-
-- The UI inserts one row into `planning.command` (`command`, `property_code`, `scenario_id`,
-  `payload`, `reason`) with `insert_planning_command_one`, selecting `result`.
-- A `BEFORE INSERT` trigger reads the session from `current_setting('hasura.user', true)`, checks
-  `planning.can`, calls the function named by `command` with `payload` unpacked into its
-  arguments, and stores the returned rows as JSON in `result`.
-- The two tables are in `02-data-model.md` §9. Build them only if this fallback is used.
-
-Nothing else in this document differs between the two: same functions, same arguments, same
-results, same errors.
+  the new one is not live yet and move with everything else at cutover (README A14).
 
 ## 2. Setup and chart
 
@@ -514,7 +497,6 @@ financial_cube.resolve_account_lines(p_code text, p_account_ids text[]) RETURNS 
 financial_cube.forecast_week_revision(p_date date) RETURNS integer
 planning.can(hasura_session json, action_key text, property_code text DEFAULT NULL) RETURNS boolean
 planning.month_key(p_date date) RETURNS date                                                       -- IMMUTABLE: the 2nd of p_date's month
-planning.execute_command() RETURNS trigger                                                         -- fallback only (§1.4)
 ```
 
 pg_cron (script under `database/sph/postgres/updates/`, in the style of

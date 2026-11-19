@@ -73,9 +73,9 @@ Shape of the solution:
 - No transaction table exists. No partitioned table exists in SPH.
 - The ui repo is Angular 19 with PrimeNG, `ave-*` atoms, AG Grid Enterprise 35 and a Zeus GraphQL
   client. Version pickers are hard-coded in `src/domain/`.
-- Hasura runs with inferred function permissions. `database/README.md` says that keeps volatile
-  functions from non-admin roles; the live metadata nevertheless exposes seven of them to `user`
-  by explicit permission, and one was tested live (`07-hasura-rebuild.md` §2). The endpoint is
+- Hasura runs with inferred function permissions. A volatile function is still exposed to a
+  non-admin role when the permission is explicit in the metadata: seven are today, and Austin
+  confirmed it by test on 2026-11-18 (`07-hasura-rebuild.md` §2). The endpoint is
   written into five repos. App-wide permissions are being rebuilt as module-based
   roles (`docs/workbench/permissions-unification-rbac-response.md`); they are not live yet.
 
@@ -105,7 +105,7 @@ Shape of the solution:
 | D20 | Making a scenario | Three options from any scenario. **Copy:** full copy, does not follow its original, still updates with actuals. **Fork:** follows its original. **Snapshot:** fully locked, does not update with actuals. |
 | D21 | Latest forecast | The working forecast is its own version. `latest_forecast` keeps resolving to the latest locked forecast (`forecastN`, `forecastN.M`), with no change to the ladder. |
 | D22 | Permissions | Everyone is Hasura role `user`. Reading and editing the planner is a module entitlement plus a per-user permission assignment in the app-wide model being built. No planner-specific role table. |
-| D23 | Writes | Hasura infers function permissions, so volatile functions are unusable by non-admins. The UI cannot write through tracked functions on the main API. *The premise is under check: see `07-hasura-rebuild.md` §2.* |
+| D23 | Writes | Hasura infers function permissions, so volatile functions are unusable by non-admins. The UI cannot write through tracked functions on the main API. *Disproved 2026-11-18: an explicit permission in the metadata exposes a volatile function to `user` (`07-hasura-rebuild.md` §2). Tracked mutation functions are the write path.* |
 | D24 | Planner API | *Superseded by D25.* Create a new Hasura API specific to the planner, with function-level permissions, so its volatile functions can be mutations for ordinary users. |
 | D25 | One app API | Make a new Hasura with function-permission inference off, rebuild the entire existing metadata under it so function permissions can be used, and replace the API endpoint for the whole app. In scope. |
 
@@ -119,14 +119,13 @@ Shape of the solution:
 | A4 | Stat pairings for operators with their own stat GLs are approved by Singlepane staff at onboarding | `04` §1.1, `05` §12 | Put `set_stat_pair` under `planning.standard.update` |
 | A5 | In a copy, feed-driven lines freeze at their values when copied | `03` §10 | Copy `feed` components unchanged |
 | A6 | Driver methods are a catalog table (`planning.method`) carrying labels and parameter rules; driver types and the other small enumerations stay `CHECK` constraints | `02` §3 | Replace the catalog with a `CHECK` |
-| A13 | The command table is built only if the check in `07` §2 fails and the new API is not live when the first write ships | `04` §1.4, `02` §9 | Build the two fallback tables; in the UI only `run()` changes |
 | A7 | Budget drafts are copies that do not take actuals; one official `budget` per hotel and year | `03` §10, `04` §4 | — |
 | A8 | New tables use `gen_random_uuid()`, not the README's `uuid_generate_v4()` | `02` conventions | Change the default; keep seeds after `RESET ROLE` either way |
 | A9 | Operator standards carry method and driver, not values; values come from the hotel's history; no automatic propagation to hotels | `02` §1, `04` §2 | — |
 | A10 | The engine recalculates a hotel's open periods in full on every patch | `03` §6 | Implement the dirty-set path behind `p_line_ids` |
 | A11 | Subtotals and KPIs in the workspace come from the existing data layer by version key, not from a new rollup | `04` §3, `05` §6.1 | — |
 | A12 | The first usable release is C1–C4 + U0–U4; top line beyond monthly entry, ledger and agent follow | `06` §2 | Reorder |
-| A14 | Planner packages do not wait for the new API: a volatile function with an explicit permission already runs for `user` on the current one, and the metadata entries are the same on both | `07` §2, `06` §2 | If Austin's check fails, U1 and later UI packages depend on H4, or use A13 |
+| A14 | Planner packages do not wait for the new API. *Confirmed 2026-11-18:* a volatile function with an explicit permission runs for `user` on the current one, and the metadata entries are the same on both | `07` §2, `06` §2 | — |
 | A15 | The new API gives every role exactly the functions it reaches today; trimming comes after the move | `07` §4.3 | Edit the exposure matrix before H3 |
 | A16 | The new project keeps the current database logins, JWT configuration and engine version | `07` §4.1 | Separate changes, after cutover |
 
@@ -285,12 +284,12 @@ Blocking a specific package:
 | Name the hotel for the real-hotel seeding check | C3b sign-off |
 | A sample Duetto forecast export | The Duetto part of C5 |
 | A sample GL-detail export from M3, Sage and PeopleSoft, one each | Real report types in C6 (the generic transformer does not wait) |
-| Run the check in `07` §2 (does the current API already run a volatile function for `user`?) and decide whether the API move goes ahead now | Whether UI packages that write depend on H4 (A14) |
+| Decide whether the API move (D25) still goes ahead now: the check in `07` §2 passed, so users can already write through functions without it | H packages only; no planner package depends on it |
 | The new Hasura project (D25): who creates it, its plan and domain, the current project's environment for comparison, where the new metadata lives, the event trigger rehearsal, the public API's Hasura (`07` §10) | H2 and everything after it |
 | The app-wide permission model: register the planner's actions (`04` §1.1) and switch `planning.can` when it ships | Real per-user permissions; until then the interim rule (A3) applies |
 | Agent service spec and its webhook | C7 end to end, U7 "Ask the agent" |
 
-Not blocking (defaults in §5): A1–A16.
+Not blocking (defaults in §5): A1–A16 (A13 was removed).
 
 ## 10. Revisions
 
@@ -330,3 +329,14 @@ Append dated subsections here; do not rewrite decisions in place.
   to `user` by explicit permission, and the deal model scenario push was tested live through one
   of them. If Austin's check confirms it, planner writes do not need the new API (A14) and the
   move rests on its own reasons. The check's result goes here when it is run.
+
+### 2026-11-18, fifth pass (the check passed)
+
+- **Result.** Austin ran the check in `07-hasura-rebuild.md` §2:
+  `acquisitions_upsert_deal_model_scenario` is in `mutation_root` for `user` and `demo`, and a
+  test push through it with a non-admin session succeeded. The premise recorded in D23 is
+  disproved: an explicit function permission in the metadata is enough on the current API.
+- **Planner.** Writes are tracked mutation functions on the current API. A14 is confirmed. The
+  command table fallback (A13, `04` §1.4, `02` §9, `planning.execute_command`) is removed.
+- **The API move (D25)** is still in this plan, with no planner package depending on it. Whether
+  it goes ahead now is open with Austin (§9).

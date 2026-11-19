@@ -21,43 +21,39 @@ Packages are `H1`–`H5` (§9). Everything about Hasura that an agent must not d
 Both projects read and write the same two databases, so there is no data to move. Clients can
 switch one at a time, and a client that misbehaves can be pointed back.
 
-## 2. Check this first: the current API already runs volatile functions for `user`
+## 2. Checked: the current API already runs volatile functions for `user`
 
-Recorded by the author for Austin; it bears on how much of this plan depends on the move.
+Confirmed by Austin on 2026-11-18. It bears on how much of this plan depends on the move.
 
 `database/README.md` says that with inferred permissions "mutations cannot be exposed to non-Admin
 roles", and the notetaker routines were dropped for that reason (`20260730-02`). The Hasura
-documentation reads the same way. But the live metadata says otherwise:
+documentation reads the same way. That is not how the current API behaves:
 
 - Source `rdsProd` has ten functions with `exposed_as: mutation`. Seven of them carry an explicit
   permission for role `user`: `acquisitions.upsert_deal_model_scenario`, `set_deal_model_current`,
   `archive_deal_model_scenario`, `accept_listing_diff_item`, `materialize_listing`,
   `transition_listing_access`, and `labor.delete_location_labor_data_for_range`.
-- The Excel add-in calls Hasura with the signed-in user's token, never an admin secret, and the
-  scenario push through `upsert_deal_model_scenario` was tested live on 2026-11-05 as the demo
-  user (a role that inherits `user`). `database/docs/acquisitions/deal_model_scenarios.md`
-  describes the three writes as "exposed as mutations with permission for role `user`".
-- The billing project (`database/hasura/billing/`) has 24 functions exposed as mutations to
-  `billing-admin`, and its setup runbook sets no inference variable.
+- **Introspection:** `acquisitions_upsert_deal_model_scenario` is in `mutation_root` for role
+  `user` and for `demo`.
+- **Execution:** a scenario push through that mutation with a non-admin session returned its row,
+  and the archive mutation cleaned it up.
+- The billing project (`database/hasura/billing/`) works the same way: 24 functions exposed as
+  mutations to `billing-admin`, with no inference variable set.
 
-The likely explanation: with inference on, Hasura never *infers* access to a volatile function,
-and its console offers no way to grant it, but a permission written in the metadata JSON is
-honored. Every function added since the deal model work was added through JSON.
+What is true, then: with inference on, Hasura never *infers* access to a volatile function, and
+its console offers no control to grant it, but a permission written in the metadata JSON is
+honored. A role still needs select on the function's return table.
 
-**The check (five minutes, needs the admin secret, so it is Austin's):** introspect the current
-API with `x-hasura-role: user` and look for `acquisitions_upsert_deal_model_scenario` in
-`mutation_root`.
+Consequences:
 
-- **It is there:** planner writes work on the current API exactly as specified in `04-api.md`,
-  with the same metadata entries the new API needs. The planner then does not wait for this move,
-  and the move stands on its own reasons: permissions stated per function for all 191 functions
-  instead of inferred, which the README has named as the direction since the first snapshot.
-  Austin may also decide the move is no longer worth doing now; nothing else in this plan
-  changes if he does.
-- **It is not there:** package U1 and every UI package that writes gain a dependency on H4, or use
-  the command table fallback (`04-api.md` §1.4).
-
-The rest of the plan assumes the first outcome (assumption A14).
+- **Planner writes work on the current API** exactly as specified in `04-api.md`, with the same
+  metadata entries the new API would need. No planner package depends on this move, and the
+  command table that an earlier pass kept as a fallback is removed from the plan.
+- **The move no longer has to happen for functions to be writable by users.** What it still buys
+  is a permission stated on every one of the 191 functions instead of inferred from return tables,
+  which is the only way to keep a query function from a role that can select its return table.
+  Whether that is worth doing now is Austin's decision (§10). D25 stands until he changes it.
+- `database/README.md`, "Functions", is corrected in the same PR as this document.
 
 ## 3. What exists today
 
@@ -267,14 +263,14 @@ Nothing structural. The planner is one more module on the app API:
   on each (`04-api.md` §9), on whichever project is live. The generator carries them across.
 - Its UI uses the app's one endpoint and the app's generated client (`05-ui.md` §1). There is no
   planner endpoint, client or database login.
-- Its packages do not depend on H packages unless the check in §2 fails.
+- Its packages do not depend on H packages (§2).
 
 ## 9. Work packages
 
 | WP | Who | Scope | Depends on | Done when |
 |---|---|---|---|---|
 | H1 | sp-core agent | `rebuild_metadata.py`, the exposure matrix, `compare_role_schemas.py`, unit tests on a reduced metadata fixture, `database/docs/hasura/api-rebuild-runbook.md` | — | Run on the committed metadata: output is deterministic; every function has a `permissions` list; the matrix shows no difference or lists each one; no literal URL or key in the output; event triggers are in their own file; the variable list is printed |
-| H2 | Austin | The §2 check. The new project, its environment and database access. The event trigger rehearsal on copies (§6) | H1 | The check's result is recorded in README §10. The rehearsal's observations and the production runbook for event triggers are written into the runbook |
+| H2 | Austin | The new project, its environment and database access. The event trigger rehearsal on copies (§6) | H1 | The rehearsal's observations and the production runbook for event triggers are written into the runbook |
 | H3 | Austin, with the scripts | Apply the generated metadata to the new project; all of §5 | H2 | Every item in §5 passes or has a recorded, accepted difference |
 | H4 | one agent per repo, Austin deploys | The client changes in §7.3, in the order of §7.1 steps 1 and 3–6 | H3 | Each client runs on the new endpoint in production; the old project's request count falls to the callers not yet moved |
 | H5 | Austin | Event trigger switch (§7.1 step 2, scheduled inside H4); retire the old project (step 7) | H4 | No undelivered or doubled events through the switch; old project deleted after its access was cut; repo files and docs updated |
@@ -292,7 +288,7 @@ To settle:
 
 | Item | Needed for |
 |---|---|
-| Run the check in §2 and decide whether the move still goes ahead now | Everything in this document |
+| Decide whether the move still goes ahead now that functions are already writable by users (§2) | Everything in this document |
 | Who creates the project; its plan; whether it gets a domain we own (§7.2) | H2 |
 | The current project's environment variables and engine version, exported for comparison | H2 |
 | Where the new metadata lives: this repo (`database/hasura/app/`, assumed) or the Hasura repository the README anticipates | H1 |

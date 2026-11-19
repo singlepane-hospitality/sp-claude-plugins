@@ -35,8 +35,7 @@ registry table is in `01-version-registry.md`.
 - Every table gets `COMMENT ON TABLE` and comments on non-obvious columns.
 - No table here is tracked in Hasura for insert, update or delete. Reads and writes go through
   the functions in `04-api.md`, tracked on the app's Hasura API with a permission on each
-  function. `planning.method` and the `_rt` return tables are tracked for select. §9 holds a
-  fallback that should not be needed.
+  function. `planning.method` and the `_rt` return tables are tracked for select.
 - Who may do what is **not** stored in this schema. Permissions come from the app-wide model
   (`docs/workbench/permissions-unification-rbac-response.md`) through `planning.can`
   (`04-api.md` §1.1). Do not add role, grant or membership tables under `planning`.
@@ -564,43 +563,3 @@ department, department, hotel, template, company. No row means `suggest`.
 - `planning.result_*` and `ledger.transaction` are partitioned from the first script. Do not add
   partitions by hand later; put partition creation in the script and, for the ledger, in a small
   `ledger.ensure_partitions(year)` function called by the loader.
-
-## 9. Fallback: command table
-
-Build these two tables only in the case described in `04-api.md` §1.4: the check in
-`07-hasura-rebuild.md` §2 fails and the new API is not live when the first write ships.
-
-```sql
-CREATE TABLE planning.command_type (             -- catalog of commands and the permission each needs
-  command       text PRIMARY KEY,                -- the mutation's name: 'apply_patch','create_scenario', ...
-  action_key    text,                            -- central permission action; null = Hasura role admin only
-  scope         text NOT NULL CHECK (scope IN ('hotel','company')),
-  description   text NOT NULL,
-  active_flag   boolean NOT NULL DEFAULT true
-  -- audit
-);
-
-CREATE TABLE planning.command (                  -- one row per write requested by a client
-  command_id     uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  command        text NOT NULL,                  -- FK planning.command_type
-  property_code  text,                           -- null for company-scope commands
-  scenario_id    uuid,
-  payload        jsonb NOT NULL DEFAULT '{}'::jsonb,
-  reason         text,
-  result         jsonb,                          -- written by the trigger; never sent by the client
-  calc_ms        integer,
-  created_by     uuid,
-  created_at     timestamptz NOT NULL DEFAULT now()
-);
-CREATE INDEX command_created_by_idx ON planning.command (created_by, created_at DESC);
-```
-
-- Trigger `command_created BEFORE INSERT` → `utility.set_created()` (stamps `created_by` from the
-  Hasura session), then `command_execute BEFORE INSERT` → `planning.execute_command()`. Trigger names
-  matter: they fire in name order, and `created` sorts before `execute`.
-- `execute_command` ignores any `result` or `calc_ms` the client sent, authorizes with
-  `planning.can`, runs the command and fills both columns. See `04-api.md` §1.4.
-- Insert-only: no `updated_*` columns, and a `BEFORE UPDATE OR DELETE` trigger that raises unless
-  the caller is the queue worker's cleanup (rows older than 30 days).
-- `command_type` is seeded with the mutations in `04-api.md` and their action keys. When the
-  central `protected_operation` registry exists, it is the planner's input to it.
