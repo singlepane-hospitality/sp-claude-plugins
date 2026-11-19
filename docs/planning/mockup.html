@@ -1,0 +1,1396 @@
+<title>Singlepane Planning Brainstorm</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
+<style>
+/* Layout: a working document. Top nav switches sections; the Screens section holds three app mockups in a framed "app" surface, the rest is prose and reference tables. */
+:root{
+  --bg:#f3f5f8; --surface:#ffffff; --surface-2:#e9edf2; --ink:#16212d; --muted:#586676; --line:#d5dce4;
+  --accent:#0b6b6f; --accent-ink:#ffffff; --accent-soft:#dcefee;
+  --agent:#7a4f00; --agent-soft:#fbefd5;
+  --good:#13744a; --bad:#b4372f; --actual:#eef1f5; --edit:#fffbe8; --flash:#ffe58a;
+  --font-display:'Space Grotesk','Inter',system-ui,sans-serif;
+  --font-body:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --font-mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#10151b; --surface:#171f29; --surface-2:#1f2a36; --ink:#e6ebf0; --muted:#98a6b4; --line:#2d3a48;
+    --accent:#56c4c0; --accent-ink:#06211f; --accent-soft:#143533;
+    --agent:#f1c26c; --agent-soft:#3a2f15;
+    --good:#62d19a; --bad:#f08d83; --actual:#131a23; --edit:#26281a; --flash:#5a5016;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#10151b; --surface:#171f29; --surface-2:#1f2a36; --ink:#e6ebf0; --muted:#98a6b4; --line:#2d3a48;
+  --accent:#56c4c0; --accent-ink:#06211f; --accent-soft:#143533;
+  --agent:#f1c26c; --agent-soft:#3a2f15;
+  --good:#62d19a; --bad:#f08d83; --actual:#131a23; --edit:#26281a; --flash:#5a5016;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:14px/1.55 var(--font-body);margin:0}
+.wrap{max-width:1340px;margin:0 auto;padding-block:28px 72px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--font-display);text-wrap:balance;margin:0;line-height:1.2}
+h1{font-size:clamp(24px,3.4vw,34px);font-weight:600;letter-spacing:-.01em}
+h2{font-size:21px;font-weight:600}
+h3{font-size:15px;font-weight:600}
+p{margin:0}
+code{font-family:var(--font-mono);font-size:.92em;background:var(--surface-2);padding:1px 5px;border-radius:4px}
+.eyebrow{font-size:11.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.lede{max-width:74ch;color:var(--muted);font-size:15px;margin-top:10px}
+header.top{display:flex;flex-direction:column;gap:6px;margin-bottom:22px}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.tabs{display:flex;flex-wrap:wrap;gap:4px;border-bottom:1px solid var(--line);margin-bottom:24px}
+.tabs button{background:none;border:0;border-bottom:2px solid transparent;padding:9px 12px;font-weight:500;color:var(--muted)}
+.tabs button.on{color:var(--ink);border-bottom-color:var(--accent)}
+.sec{display:flex;flex-direction:column;gap:22px}
+.prose{max-width:76ch;display:flex;flex-direction:column;gap:10px}
+.prose ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.panel ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:7px}
+.note{border-left:3px solid var(--accent);background:var(--accent-soft);padding:10px 14px;border-radius:0 8px 8px 0;max-width:86ch}
+.scroll{overflow-x:auto}
+table.ref{border-collapse:collapse;width:100%;min-width:640px;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+table.ref th,table.ref td{text-align:left;vertical-align:top;padding:9px 12px;border-bottom:1px solid var(--line)}
+table.ref th{font-size:11.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:600;background:var(--surface-2)}
+table.ref tr:last-child td{border-bottom:0}
+table.ref td:first-child{white-space:nowrap;font-weight:500}
+.flow{display:flex;flex-wrap:wrap;gap:8px;align-items:stretch}
+.flow .box{flex:1 1 170px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.flow .box b{font-family:var(--font-display)}
+.flow .box small{color:var(--muted);font-size:12.5px}
+.flow .box.new{border-color:var(--accent);background:var(--accent-soft)}
+.flow .arr{align-self:center;color:var(--muted);font-size:18px}
+ol.q{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:12px;max-width:86ch}
+ol.q b{font-weight:600}
+
+/* ---------- app mockups ---------- */
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface)}
+.seg button{background:none;border:0;padding:6px 12px;color:var(--muted);font-weight:500}
+.seg button.on{background:var(--accent);color:var(--accent-ink)}
+.try{color:var(--muted);max-width:92ch}
+.app{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.app-bar{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;padding:10px 14px;background:var(--surface-2);border-bottom:1px solid var(--line)}
+.hotel{display:flex;flex-direction:column;line-height:1.25}
+.hotel b{font-family:var(--font-display);font-size:15px}
+.hotel span{font-size:12px;color:var(--muted)}
+.pills{display:flex;flex-wrap:wrap;gap:6px}
+.pill{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 11px;font-size:12.5px;display:inline-flex;gap:6px;align-items:center}
+.pill.on{border-color:var(--accent);background:var(--accent-soft);font-weight:600}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--good);display:inline-block}
+.lock{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.bar-right{margin-left:auto;display:flex;flex-wrap:wrap;gap:10px;align-items:center;font-size:12px;color:var(--muted)}
+.btn{border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);border-radius:7px;padding:5px 11px;font-weight:600;font-size:12.5px}
+.btn.ghost{background:none;color:var(--accent)}
+.btn.quiet{border-color:var(--line);background:var(--surface);color:var(--ink);font-weight:500}
+.btn[disabled]{opacity:.5;cursor:default}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));border-bottom:1px solid var(--line)}
+.kpi{padding:10px 14px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:1px;min-width:0}
+.kpi span{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+.kpi b{font-family:var(--font-display);font-size:19px;font-variant-numeric:tabular-nums}
+.kpi small{font-size:11.5px;font-variant-numeric:tabular-nums}
+.good{color:var(--good)} .bad{color:var(--bad)}
+.toolbar{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;padding:9px 14px;border-bottom:1px solid var(--line);font-size:12px;color:var(--muted)}
+.sw{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-2px;margin-right:4px;border:1px solid var(--line)}
+.work{display:grid;grid-template-columns:minmax(0,1fr)}
+.work.has-insp{grid-template-columns:minmax(0,1fr) 370px}
+@media (max-width:900px){.work.has-insp{grid-template-columns:minmax(0,1fr)}}
+.gridwrap{overflow-x:auto;min-width:0}
+table.grid{border-collapse:separate;border-spacing:0;font-size:12px;font-variant-numeric:tabular-nums;width:100%}
+table.grid th,table.grid td{padding:5px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+table.grid thead th{font-size:11px;color:var(--muted);font-weight:600;background:var(--surface);position:sticky;top:0}
+table.grid thead th small{display:block;font-weight:500;font-size:9.5px;text-transform:uppercase;letter-spacing:.06em}
+table.grid .c-name{text-align:left;position:sticky;left:0;background:var(--surface);z-index:1;min-width:190px;max-width:230px;white-space:normal}
+table.grid .c-drv,table.grid .c-src{text-align:left;min-width:150px}
+table.grid .c-note{text-align:left;white-space:normal;min-width:230px}
+table.grid td.a,table.grid th.a{background:var(--actual);color:var(--muted)}
+table.grid th.we{color:var(--accent)}
+table.grid tr.grp td{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600;background:var(--surface-2);text-align:left;position:sticky;left:0}
+table.grid tr.tot td{font-weight:700;border-top:1px solid var(--ink)}
+table.grid tr.child td{color:var(--muted);font-size:11.5px}
+table.grid tr.child .c-name{padding-left:30px}
+table.grid tr.sel .c-name{box-shadow:inset 3px 0 0 var(--accent)}
+table.grid td.fy{font-weight:600;border-left:1px solid var(--line)}
+.caret{border:0;background:none;padding:0 4px 0 0;color:var(--muted);width:18px;display:inline-block}
+.linebtn{border:0;background:none;padding:0;text-align:left;font-weight:500}
+.linebtn:hover{color:var(--accent)}
+.chip{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);border-radius:999px;padding:1px 9px;background:var(--surface);font-size:11.5px;white-space:nowrap}
+.chip:hover{border-color:var(--accent)}
+.chip.multi{background:var(--accent-soft);border-color:transparent}
+.chip.feed{border-style:dashed}
+input.cell{width:54px;text-align:right;font:inherit;color:var(--ink);background:var(--edit);border:0;border-bottom:1px dashed var(--accent);padding:1px 2px;border-radius:2px;font-variant-numeric:tabular-nums}
+input.cell.day{width:36px}
+input.cell.ovr{border-bottom-style:solid;font-weight:700}
+td.imp{font-style:italic}
+@keyframes flash{from{background:var(--flash)}to{background:transparent}}
+td.flash{animation:flash 1.6s ease-out}
+@media (prefers-reduced-motion:reduce){td.flash{animation:none;box-shadow:inset 0 -2px 0 var(--flash)}}
+.insp{border-left:1px solid var(--line);padding:14px;display:flex;flex-direction:column;gap:12px;min-width:0;background:var(--surface)}
+@media (max-width:900px){.insp{border-left:0;border-top:1px solid var(--line)}}
+.insp-h{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.insp-h small{color:var(--muted);display:block;font-size:11.5px}
+.x{border:0;background:none;font-size:18px;line-height:1;color:var(--muted);padding:2px 6px}
+.itabs{display:flex;gap:2px;border-bottom:1px solid var(--line)}
+.itabs button{border:0;background:none;padding:6px 9px;font-size:12.5px;color:var(--muted);border-bottom:2px solid transparent}
+.itabs button.on{color:var(--ink);border-bottom-color:var(--accent);font-weight:600}
+.comp{border:1px solid var(--line);border-radius:8px;padding:9px 10px;display:flex;flex-direction:column;gap:5px}
+.comp-h{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.tag{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;border-radius:4px;padding:1px 6px;background:var(--surface-2);color:var(--muted);font-weight:600;white-space:nowrap}
+.tag.agent{background:var(--agent-soft);color:var(--agent)}
+.comp-f{font-size:13px;display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.comp-f input{width:66px;font:inherit;text-align:right;padding:2px 4px;border:1px solid var(--line);border-radius:5px;background:var(--edit);color:var(--ink)}
+.comp-m{font-size:11.5px;color:var(--muted)}
+.fv{display:flex;height:8px;border-radius:4px;overflow:hidden;background:var(--surface-2)}
+.fv i{display:block;background:var(--muted)} .fv b{display:block;background:var(--accent)}
+.mini text{font:10px var(--font-body);fill:var(--muted)}
+.mini .ba{fill:var(--muted)} .mini .bf{fill:var(--accent)} .mini .bb{stroke:var(--ink);stroke-width:1.5}
+.mini .bh{fill:var(--surface-2);stroke:var(--line)} .mini .lp{fill:none;stroke:var(--accent);stroke-width:2} .mini .dp{fill:var(--accent)}
+.mini .ls{fill:none;stroke:var(--agent);stroke-width:2;stroke-dasharray:4 3}
+.fitk{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.fitk div{border:1px solid var(--line);border-radius:8px;padding:7px 9px;display:flex;flex-direction:column;min-width:0}
+.fitk span{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.fitk b{font-family:var(--font-display);font-size:17px;font-variant-numeric:tabular-nums}
+.fitk small{font-size:11px;color:var(--muted)}
+.comp.sug{border-color:var(--agent);background:var(--agent-soft)}
+.cmp{display:inline-flex;gap:6px;align-items:center}
+.cmp select,#scenName{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:4px 8px}
+#scenName{min-width:210px}
+table.tx{border-collapse:collapse;width:100%;font-size:12px;font-variant-numeric:tabular-nums}
+table.tx td,table.tx th{padding:5px 6px;border-bottom:1px solid var(--line);text-align:left}
+table.tx th{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+table.tx td.r,table.tx th.r{text-align:right}
+table.tx tr.flag td{background:var(--agent-soft)}
+ul.log{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:9px;font-size:12.5px}
+ul.log small{color:var(--muted);display:block}
+.daynote{padding:9px 14px;font-size:12.5px;border-top:1px solid var(--line);color:var(--muted)}
+.daynote b{color:var(--ink)}
+.agentgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:0}
+.agentcol{padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.agentcol + .agentcol{border-left:1px solid var(--line)}
+@media (max-width:760px){.agentcol + .agentcol{border-left:0;border-top:1px solid var(--line)}}
+.card{border:1px solid var(--line);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:7px}
+.card .row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.card .ev{font-size:12px;color:var(--muted)}
+.card .state{font-size:12.5px;font-weight:600;color:var(--good)}
+.msg{border-radius:10px;padding:10px 12px;max-width:94%;display:flex;flex-direction:column;gap:8px}
+.msg.user{align-self:flex-end;background:var(--accent);color:var(--accent-ink)}
+.msg.bot{align-self:flex-start;background:var(--surface-2)}
+.msg table{border-collapse:collapse;font-size:12px;width:100%;font-variant-numeric:tabular-nums}
+.msg td,.msg th{padding:4px 6px;border-bottom:1px solid var(--line);text-align:left}
+.msg th{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+</style>
+
+<div class="wrap">
+<header class="top">
+  <span class="eyebrow">Brainstorm · revised 18 November 2026 after first answers · mock data throughout</span>
+  <h1>Driver-based budgeting and forecasting on Singlepane</h1>
+  <p class="lede">What the current data model can carry, where the forecast engine should live, how it stays in step with actuals, and three screens that replace ProfitSage's seven tabs. The screens are live mockups: edit a driver and the numbers move.</p>
+</header>
+
+<nav class="tabs" id="nav" aria-label="Sections">
+  <button data-sec="screens" class="on">Screens</button>
+  <button data-sec="start">Starting point</button>
+  <button data-sec="model">Data model</button>
+  <button data-sec="engine">Engine and stack</button>
+  <button data-sec="feeds">Feeds</button>
+  <button data-sec="agent">Agent</button>
+  <button data-sec="questions">Decisions and v1 scope</button>
+</nav>
+
+<!-- ================= SCREENS ================= -->
+<section class="sec" id="sec-screens">
+  <div class="seg" id="screenSeg" role="tablist" aria-label="Mockup screens">
+    <button data-screen="fw" class="on">Forecast workspace</button>
+    <button data-screen="daily">Daily top line</button>
+    <button data-screen="ag">Agent</button>
+    <button data-screen="coa">Chart of accounts</button>
+  </div>
+
+  <div id="screen-coa" class="sec" hidden>
+    <p class="try"><b>Which accounts are in the forecast is a setting you can see.</b> The operator's chart is much larger than what one hotel uses, so each hotel turns accounts on or off, with dates, and can turn one on before it has any actuals. Try: filter to Needs attention and enable the account that has actuals but is off, or turn on an account this hotel has never used.</p>
+    <div class="app">
+      <div class="app-bar">
+        <div class="hotel"><b>Harborview Hotel</b><span>Chart of accounts · Coastal Hospitality chart, 9,412 accounts</span></div>
+        <div class="seg" id="coaSeg" aria-label="Filter accounts"></div>
+        <div class="bar-right"><span id="coaCount"></span><button class="btn quiet" disabled>Add from operator chart</button></div>
+      </div>
+      <div class="gridwrap"><table class="grid" id="coaGrid"></table></div>
+      <div class="daynote">Enabling an account creates its forecast line from the operator standard's driver. Turning one off ends its drivers from that month; history and locked forecasts keep it. An account must be mapped to a Singlepane line before it can be enabled.</div>
+    </div>
+  </div>
+
+  <div id="screen-fw" class="sec">
+    <p class="try"><b>The P&amp;L is the editor.</b> Every line shows how it is forecast, next to its numbers. Try: click a driver chip to open the line, change a rate and watch the months and totals move; switch to <b>Rates</b> and type a different rate into one month, or to <b>Statistics</b> to see the hours and covers each line writes to its stat account; open Payroll taxes and benefits to see the set of GLs it is a percent of; open Operating supplies and its <b>Driver fit</b> tab to see how the drivers would have done against the last twelve months, and apply the suggested split; expand Laundry or Housekeeping wages to see several components on one GL line (one supervisor at 1 FTE plus half an hour per occupied room at $20); open Downside, a fork of the working forecast with occupancy 8% lower in June to September, then change a driver in the working forecast and see Downside move with it while the Forecast 2 snapshot does not; use Save as to make a fork, a copy or a snapshot of whichever scenario is open, and pick it in Compare to.</p>
+    <div class="app">
+      <div class="app-bar">
+        <div class="hotel"><b>Harborview Hotel</b><span>312 rooms · FY 2026 · slice of the Rooms department</span></div>
+        <div class="pills" id="pills"></div>
+        <div class="bar-right"><label class="cmp" for="cmpSel">Compare to <select id="cmpSel"></select></label><button class="btn" id="lockBtn">Save as…</button></div>
+      </div>
+      <div class="toolbar" id="lockForm" hidden>
+        <label for="scenName" id="lockSrc">Save as</label><input id="scenName" type="text" autocomplete="off">
+        <label class="cmp" for="scenType">as a <select id="scenType"><option value="fork">Fork: follows its source</option><option value="copy">Copy: independent, still takes actuals</option><option value="snap" selected>Snapshot: fully locked</option></select></label>
+        <button class="btn" id="lockSave">Save</button><button class="btn quiet" id="lockCancel">Cancel</button>
+        <span id="lockMsg"></span>
+      </div>
+      <div class="kpis" id="kpis"></div>
+      <div class="toolbar">
+        <div class="seg" id="modeSeg" aria-label="Cell contents"><button data-mode="amt" class="on">Amounts</button><button data-mode="rate">Rates</button><button data-mode="stat">Statistics</button></div>
+        <span><i class="sw" style="background:var(--actual)"></i>Closed month, actuals</span>
+        <span><i class="sw" style="background:var(--edit)"></i>Editable driver</span>
+        <span>Grouped by each GL's USALI department and type</span>
+        <span>Actuals through Feb 28 · working forecast is live in dashboards, Excel and MCP</span>
+        <span id="scenNote"></span>
+        <button class="btn quiet" id="archBtn" hidden>Archive this scenario</button>
+      </div>
+      <div class="work" id="work">
+        <div class="gridwrap"><table class="grid" id="grid"></table></div>
+        <aside class="insp" id="insp" hidden></aside>
+      </div>
+    </div>
+  </div>
+
+  <div id="screen-daily" class="sec" hidden>
+    <p class="try"><b>The top line is forecast by day and segment, or by month.</b> Grain is a setting per hotel: operators with an RMS work by day, and an owner forecasting above the detail types rooms and ADR by month. Either way the expenses read the same monthly totals. Try: change a future day's rooms, or switch to By month and change a month's ADR, then look at the forecast workspace.</p>
+    <div class="app">
+      <div class="app-bar">
+        <div class="hotel"><b>Harborview Hotel</b><span id="topSub">March 2026 · working forecast</span></div>
+        <div class="seg" id="grainSeg" aria-label="Top line grain"><button data-grain="day" class="on">By day and segment</button><button data-grain="month">By month</button></div>
+        <div class="seg" id="metricSeg" aria-label="Metric"><button data-metric="rooms" class="on">Rooms</button><button data-metric="adr">ADR</button><button data-metric="rev">Revenue $k</button></div>
+        <div class="bar-right" id="dayTools"><button class="btn quiet" disabled>Fill from RMS</button><button class="btn quiet" disabled>Copy last year, same weekday</button><button class="btn quiet" disabled>Spread a month target</button></div>
+      </div>
+      <div class="gridwrap"><table class="grid" id="dgrid"></table></div>
+      <div class="daynote" id="daynote"></div>
+    </div>
+  </div>
+
+  <div id="screen-ag" class="sec" hidden>
+    <p class="try"><b>The agent edits drivers, never cells.</b> Each proposal shows its evidence and its dollar impact before anything changes, and lands in the same change log as a person's edit. Try: apply the guest supplies suggestion, answer the question, or apply the laundry repricing, then go back to the forecast workspace.</p>
+    <div class="app">
+      <div class="app-bar">
+        <div class="hotel"><b>Forecast agent</b><span>Harborview Hotel · working forecast</span></div>
+        <div class="bar-right"><span>Line modes: <span class="tag">Autopilot under $500 a month</span> <span class="tag">Suggest</span> <span class="tag">Ask the owner</span></span></div>
+      </div>
+      <div class="agentgrid">
+        <div class="agentcol" id="inbox"></div>
+        <div class="agentcol" id="chat"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= STARTING POINT ================= -->
+<section class="sec" id="sec-start" hidden>
+  <div class="prose">
+    <h2>What exists today</h2>
+    <p>Left: Singlepane, read from the sp-core repo and the live SPH database. Right: ProfitSage, from clicking through its forecast input screens. Nothing was edited there.</p>
+  </div>
+  <div class="cols">
+    <div class="panel">
+      <h3>Singlepane</h3>
+      <ul>
+        <li><b>One fact table.</b> <code>cleaned.account_values</code> holds hotel code × operator GL account × month × version. 88M rows, 45 GB, not partitioned. The key is (code, time, version, account_id). No scenario or source column, and loads overwrite with no history.</li>
+        <li><b>Versions are text.</b> actual, budget, budget1–12, forecast1–12 (the reforecast after month N closes, with months 1..N copied from actuals), forecastN.M (weekly revision), proforma variants. The valid list and the "latest forecast" order are hard-coded in about six functions, with copies on legacy.</li>
+        <li><b>One global hierarchy.</b> <code>account_map</code> is global and <code>mapping_override</code> is per hotel. Rollups are computed on read. Today that goes through <code>account_map_cache</code>; PR 114's single-pass cube drops it and resolves each account's line from the override or the map, then its ancestors from <code>account_ancestor_map</code>. There is no alternate rollup per company.</li>
+        <li><b>Operator charts are far bigger than any hotel's.</b> <code>mgr_chart_of_accounts</code> holds 52,031 accounts for 41 management companies, with a department on most and <code>parent_account</code> empty. One operator has about 20,800 mapped accounts, and four of its hotels each used 430 to 1,400 in the last twelve months.</li>
+        <li><b>Statistics ride in the same table</b> under stat accounts. Most operators have their own stat GLs. For stat ledgers and ProfitSword-style exports the loader invents one by appending <code>-STAT</code> or <code>-STAT-ACCT</code> to the amount GL: about 2,400 accounts today, mostly two operators. Rooms available has its own side table.</li>
+        <li><b>The USALI reference already knows each line's natural driver.</b> <code>reference.usali</code> has a default metric and denominator for nearly every line: POR (1,940 lines), % of S&amp;W (1,556), per F&amp;B guest (1,011), % of department revenue, ADR on the matching rooms-sold line, plus department and category.</li>
+        <li><b>Daily data is deep for pace, thin for the P&amp;L.</b> On-the-books by segment by stay date is 144M rows from Demand360, IDeaS, Delphi and PMS feeds. <code>account_values_daily</code> is 150K rows from five feeds.</li>
+        <li><b>IDeaS forecasts already land.</b> <code>raw.ideas_busview</code> has occupancy forecast, forecasted room revenue and ADR forecast by business view by day. Nothing reads those columns yet.</li>
+        <li><b>Labor is hours only,</b> by position by day from Hotel Effectiveness. Wages are GL dollars.</li>
+        <li><b>No transaction table.</b> A few raw landings are one row per posting (IHG GL daily, Opera TB, Workday TB) and are collapsed on load.</li>
+        <li><b>No drivers, assumptions, seasonality or scenarios</b> for hotel P&amp;Ls anywhere in the database.</li>
+        <li><b>Context ProfitSage does not have:</b> abstracted contracts, loans and rate curves, STR, pace, labor standards, GM commentary through Scout, approval workflows.</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h3>ProfitSage</h3>
+      <ul>
+        <li><b>One formula per account.</b> Driver × Ratio = Stat, then Stat × Rate = Amount. Expenses stop at Driver × Ratio. Labor is Driver × Ratio = hours, × wage rate.</li>
+        <li><b>One driver per account,</b> assigned elsewhere. On the input grid the driver's name appears only in a hover tooltip.</li>
+        <li><b>Seven tabs for the same numbers</b> (Month, Day, Days, By Days, By Periods, 12 Months, Plan), times three account types, times a department picker inside a settings dialog.</li>
+        <li><b>Plan is a separate tab.</b> Named items with fixed monthly amounts and an "Offset to Actuals" row. No drivers inside a plan, and an account is either planned or driven.</li>
+        <li><b>Spreading is "Set Copy Range".</b> No seasonality profiles on the input screens.</li>
+        <li><b>Datasets:</b> Actuals, Actuals/Defs, Act+Cmt/Defs+Tents, Primary Forecast, Budget, Secondary Budget, Flex and named snapshots, with up to two comparisons picked in the same dialog.</li>
+        <li><b>Drill-down opens a new tab</b> listing transactions: date, type, description, stat, rate, amount, vendor, invoice or PO.</li>
+        <li><b>Each view change took 5 to 10 seconds.</b></li>
+        <li><b>Commentary</b> is one free-text box per account, 4,096 characters.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="note"><b>Read-across.</b> Keep the stat × rate decomposition, daily revenue with monthly expenses, dataset comparisons, drill to transactions, group definites and tentatives layered on actuals, and flex. Beat it on one grid instead of seven, drivers that are visible and editable in place, several dated components per line, templates that stay linked to the operator standard, speed, and an agent that maintains the drivers.</div>
+  <div class="note"><b>Verdict on the existing structure.</b> Build on it. The engine is a new schema that plans at the same grain the fact table already uses (hotel × operator GL account × period), reads actuals and statistics from it, and publishes finished forecasts back into it under the version names every screen, Excel function and MCP tool already understands.</div>
+</section>
+
+<!-- ================= DATA MODEL ================= -->
+<section class="sec" id="sec-model" hidden>
+  <div class="prose">
+    <h2>Data model</h2>
+    <p>Two new schemas. <code>ledger</code> holds transaction detail from the accounting systems. <code>planning</code> holds drivers, scenarios and results. Highlighted boxes are new.</p>
+  </div>
+  <div class="flow">
+    <div class="box new"><b>ledger</b><small>Transactions, vendors, sync state. From accounting APIs or GL-detail files.</small></div><span class="arr">→</span>
+    <div class="box"><b>cleaned.account_values</b><small>Monthly and daily actuals and statistics, as today. Trial balance stays the control total.</small></div><span class="arr">→</span>
+    <div class="box new"><b>planning inputs</b><small>Template → model → line → component, per scenario.</small></div><span class="arr">→</span>
+    <div class="box new"><b>planning.result</b><small>Every calculated cell with its driver value, ratio, stat and rate.</small></div><span class="arr">→</span>
+    <div class="box"><b>Write-through</b><small>The working forecast is written to account_values as <code>working</code> on every recalculation; locks as forecastN, forecastN.M or budget. Dashboards, Excel and MCP read it live.</small></div>
+  </div>
+  <div class="scroll">
+  <table class="ref">
+    <thead><tr><th>Table</th><th>Grain</th><th>Holds</th></tr></thead>
+    <tbody>
+      <tr><td>planning.template, template_line</td><td>Company × account</td><td>An operator's (or owner's) standard driver set. Keyed on the operator account string, which is already shared across that operator's hotels, or on a USALI line. Says whether each account is on by default for the operator's hotels.</td></tr>
+      <tr><td>planning.model</td><td>Hotel</td><td>The hotel's driver set: source template, horizon (12, 18 or 24 months on a calendar year, with a trailing-twelve lookback), and top-line grain (day by segment, or month).</td></tr>
+      <tr><td>planning.line</td><td>Hotel × account</td><td>One forecastable line: a GL account, a statistic, or a <code>USALI#</code> pseudo account for owners who plan above GL level. Kind (revenue, expense, labor, stat), native grain (day or month), owner, link to its template line and whether it is overridden. Exists for each account enabled at the hotel, with enabled-from and disabled-from months, and points at its paired stat account. Its USALI leaf, department and category are resolved from the mapping when read, not stored.</td></tr>
+      <tr><td>planning.series, series_member</td><td>Hotel × driver</td><td>Anything a component can be driven by: a stat line, a set of lines, the calendar, an external feed, a global assumption such as wage inflation. A set is a USALI node plus explicit includes and excludes. Its members are resolved when calculated, from the mapping and <code>account_ancestor_map</code>.</td></tr>
+      <tr><td>planning.account_stat_pair</td><td>Operator amount account × stat account</td><td>Which stat account an amount account's hours, covers or rooms are written to and read from, the unit, and how it was paired (suffix, proposed and approved, or created). Keyed on operator account strings, so one pairing serves every hotel on that chart.</td></tr>
+      <tr><td>planning.component</td><td>Scenario × line × item</td><td>The building block. Label, method, driver, ratio, rate, fixed %, effective from and to, spread profile, vendor, contract, origin (person, template, agent). A line is the sum of its components.</td></tr>
+      <tr><td>planning.component_period</td><td>Component × period, sparse</td><td>Month or day overrides of a ratio, rate or amount, and the month amounts of scheduled items.</td></tr>
+      <tr><td>planning.spread_profile</td><td>Hotel × profile</td><td>Twelve month weights and seven weekday weights; typed in, or derived from last year, a three-year average, or a driver.</td></tr>
+      <tr><td>planning.scenario</td><td>Hotel × scenario</td><td>Name, kind (working, budget, official lock, custom, what-if), how it was made (fork, copy or snapshot) and from which source, author (operator or owner), actuals-through date, who locked it and when, and its registry version. Custom scenarios are defined per company with a list of hotels, at most five per hotel.</td></tr>
+      <tr><td>planning.scenario_change</td><td>Scenario × line or component × period</td><td>What a fork changes relative to its source: a replacement value, or an adjustment (percent or amount) to the source's value. Everything not listed here is read from the source. Copies and snapshots have no rows here; they hold full copies.</td></tr>
+      <tr><td>planning.result</td><td>Scenario × line × component × period</td><td>Driver value, ratio, stat, rate, amount, and whether the cell is calculated, actual, overridden or fed. Partitioned.</td></tr>
+      <tr><td>planning.change</td><td>Append-only</td><td>Every patch: who or which agent, the before and after, the reason, the evidence, the dollar impact.</td></tr>
+      <tr><td>planning.suggestion</td><td>Hotel × finding</td><td>What a detector found, the proposed patch, impact, the question asked and its answer, status.</td></tr>
+      <tr><td>planning.recalc_request</td><td>Queue</td><td>Scenario, dirty lines and periods, reason. Coalesced per hotel.</td></tr>
+      <tr><td>planning.autopilot_policy</td><td>Template, hotel, department or account</td><td>Mode (off, ask, suggest, autopilot), dollar and percent limits per month, which kinds of change are allowed, who is told. The most specific row wins.</td></tr>
+      <tr><td>financial_cube.version</td><td>Version key</td><td>The registry that replaces the hard-coded lists: family, author, kind, month and revision, rank for "latest", validation behavior. Custom scenarios add rows with a label and the company that can see them, and every version dropdown reads it.</td></tr>
+      <tr><td>ledger.transaction</td><td>Posting line</td><td>Hotel, source system and id, posting date, account, journal type, amount, vendor, invoice, PO, description, and the component it was matched to.</td></tr>
+      <tr><td>ledger.connection, sync_cursor, reconciliation</td><td>Connection</td><td>Which system, where the credentials live, how far the sync has read, and transactions summed against the trial balance by account and month.</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="cols">
+    <div class="panel">
+      <h3>Rules the model follows</h3>
+      <ul>
+        <li><b>Plan at the grain already stored.</b> Lines key on the same account string as account_values, so publishing is a plain insert and USALI rollups come from the existing map.</li>
+        <li><b>A line is a sum of components.</b> Multi-driver lines and ProfitSage "Plans" are the same structure: one component per item, each with its own method and dates. "New laundry pricing from June 1" ends one component and starts another.</li>
+        <li><b>Defaults with sparse overrides.</b> A rate has one value and optional month overrides. Change the default and every month that was not overridden follows. No copy range.</li>
+        <li><b>Scenario is a real column here.</b> Inputs and results both carry it. Locking copies the inputs (a few thousand rows) and freezes the results, so a locked forecast can always explain itself.</li>
+        <li><b>One write path.</b> The grid, the MCP tools and the agent all call the same patch function. Nobody writes result cells.</li>
+        <li><b>Transactions attach to components</b> by vendor and rule. Actual versus plan then works per item, which replaces "Offset to Actuals" and gives the agent something to reason about.</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h3>Component methods</h3>
+      <ul>
+        <li><b>Fixed</b>: an amount per period, optional escalator. Uniform cleaning, $640 a month.</li>
+        <li><b>Per unit</b>: driver × rate. Guest supplies, $4.85 per occupied room.</li>
+        <li><b>Headcount</b>: FTEs × hours × wage, or FTEs × salary. One housekeeping supervisor. Hours are stored as a statistic, so productivity comes free.</li>
+        <li><b>Stat chain</b>: driver × ratio = stat, stat × rate = amount. Occupied rooms × 0.34 capture = breakfast covers, × $24.50 average check. The covers are stored as a stat that other lines can use.</li>
+        <li><b>Percent of</b>: a share of another line or set. Payroll taxes, 31.5% of rooms wages.</li>
+        <li><b>Flex</b>: base × (fixed % + variable % × driver ÷ base driver). Utilities, 70% fixed.</li>
+        <li><b>Schedule</b>: explicit amounts by month. Window cleaning in April and October.</li>
+        <li><b>Feed</b>: the value arrives from a source. Rooms and rate by segment by day from the RMS.</li>
+        <li><b>History seed</b>: derive a ratio from actuals (trailing twelve, same month last year) and store it as an ordinary parameter. This is how a hotel gets a full model on day one.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="prose">
+    <h2>Sets, grouping and stat accounts</h2>
+    <p>Three things the engine needs before operator hierarchies exist. All three can come from the mapping to Singlepane USALIs that every GL already has. Counts are from today's <code>account_map</code> and <code>reference.usali</code>.</p>
+  </div>
+  <div class="cols">
+    <div class="panel">
+      <h3>Sets of GLs as a driver</h3>
+      <ul>
+        <li><b>A set is a USALI node, not a list.</b> "Rooms salaries and wages" is every enabled GL in this hotel whose mapping rolls up to Total Salaries Wages &amp; Bonuses - 100. Members are resolved the way PR 114's cube resolves accounts: the hotel's <code>mapping_override</code> if it has one for the account, otherwise <code>account_map</code>, then ancestors from <code>account_ancestor_map</code>. Nothing is cached, so new GLs join on their own and a mapping change takes effect at the next recalculation.</li>
+        <li><b>The defaults exist.</b> Each USALI line's default denominator names its node: a payroll-related GL defaults to a percent of its department's S&amp;W node, a supplies GL to POR on rooms occupied.</li>
+        <li><b>Templates state sets relative to the line:</b> "S&amp;W in my department". One operator rule then covers Rooms, each F&amp;B outlet and every undistributed department.</li>
+        <li><b>Includes and excludes</b> handle an operator whose subtotal differs from the USALI node (bonuses out, contract labor in). This is the stand-in for operator hierarchies on day one.</li>
+        <li><b>The engine sums the members' forecast values</b> in the scenario being calculated. A set that contains the line it drives is rejected when saved.</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h3>Grouping the workspace</h3>
+      <ul>
+        <li><b>Use the USALI mapping.</b> Each GL's leaf gives a department (Rooms, F&amp;B and its outlet, other operated, undistributed) and a category (salaries wages and bonuses, payroll-related, cost of sales, other expenses, the revenue types, the statistic types).</li>
+        <li><b>The group rows already exist</b> in the hierarchy per department: Total Salaries Wages &amp; Bonuses, Total Payroll-Related Expenses, Total Labor Costs &amp; Related Expenses, Total Other Expenses.</li>
+        <li><b>Resolve leaf, department and category when the workspace loads,</b> with the same lookup the cube uses. Storing them on the line would be another cache to keep in step.</li>
+        <li><b>Edge cases.</b> Unmapped GLs sit in an Unmapped group and block a lock. A GL split across USALIs, about 1% of accounts, groups under its largest share.</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h3>Stat accounts for stat chains</h3>
+      <ul>
+        <li><b>Each amount line that produces a statistic has a paired stat account.</b> A stat chain or labor component writes the statistic there and the dollars to the amount GL in the same recalculation. Several amount lines can share one stat account; the engine sums them. A stat account is either fed this way or forecast on its own, never both.</li>
+        <li><b>Suffix operators pair mechanically:</b> strip <code>-STAT</code> or <code>-STAT-ACCT</code>. On today's mapping that pairs wages with hours worked (1,164 accounts), room revenue with rooms sold (238) and food revenue with guests (130).</li>
+        <li><b>Operators with their own stat GLs need one pass per chart.</b> The USALI narrows the candidates but rarely to one: on one large operator chart, 75 wage GLs had exactly one candidate hours GL and 2,008 had several. Propose pairs by department segment and description inside the USALI candidates, and have a person approve them, as account mapping proposals work today.</li>
+        <li><b>No stat GL at all:</b> create <code>&lt;amount GL&gt;-STAT</code> with the loader's convention, mapped to the paired stat USALI, so forecast hours and covers have a home.</li>
+        <li><b>A USALI-level pair table seeds all of it.</b> 931 of 973 S&amp;W lines have an Hours Worked twin by name, and revenue lines already name their rooms-sold or guest line as the default denominator.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="prose">
+    <h2>Chart of accounts</h2>
+    <p>An operator's chart is far larger than what one hotel uses, and a hotel can start forecasting a GL before it has any actuals. So which accounts are in a hotel's forecast and budget is an explicit setting that can be reviewed and edited. The fourth mockup shows the hotel view.</p>
+  </div>
+  <div class="cols">
+    <div class="panel">
+      <h3>Operator chart</h3>
+      <ul>
+        <li><b>The universe is the operator's full chart:</b> <code>mgr_chart_of_accounts</code> plus any account already in <code>account_map</code> for that operator. One screen to review and edit it: description, department, mapped USALI, paired stat account, default driver, and whether the account is on by default at the operator's hotels.</li>
+        <li><b>An account can be retired for the whole operator.</b> A retired account cannot be enabled at a hotel.</li>
+        <li><b>A new account needs a mapping before it can be enabled.</b> With the cache gone there is no trigger that places an unmapped account anywhere, so this screen is where the mapping is guaranteed, through the existing mapping proposal flow.</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h3>Hotel chart</h3>
+      <ul>
+        <li><b>Each hotel has its own status per account:</b> enabled or off, with an enabled-from and a disabled-from month.</li>
+        <li><b>First setup proposes the list:</b> on for accounts with actuals in the last 12 to 24 months that map to a P&amp;L or statistic line, off for the rest.</li>
+        <li><b>Turning on an account with no history</b> creates its line from the operator standard's driver, or from the USALI default metric, and it appears in the workspace from its enabled-from month. This is the hotel that starts using a new GL in the forecast or budget.</li>
+        <li><b>Turning an account off</b> ends its components at that month. History and locked scenarios keep it.</li>
+        <li><b>Actuals that post to an account that is off</b> go to a needs-attention list, and the agent proposes enabling it.</li>
+        <li><b>Sets count actuals for every member account</b> and forecast values for the enabled ones.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="note"><b>Labor.</b> Stays at GL level, as in ProfitSage, but a wage line is built from components: a supervisor at 1 FTE, plus room attendants at 0.5 hours per occupied room and $20 an hour. Positions, schedules and payroll feeds are out of v1.</div>
+  <div class="note"><b>Hierarchies.</b> The single USALI hierarchy is enough to start because lines live at GL level and rollups are a read concern. Operator presentations come later as a second tree on <code>mgr_chart_of_accounts.parent_account</code>, a column that exists but is not populated yet. The one place the engine touches a hierarchy is subtotal drivers ("% of rooms wages"), so those point at a stored set of lines that either tree can generate.</div>
+</section>
+
+<!-- ================= ENGINE ================= -->
+<section class="sec" id="sec-engine" hidden>
+  <div class="prose">
+    <h2>Engine and stack</h2>
+    <p><b>Postgres is sufficient, and the calculation should run inside it.</b> A hotel forecast is a small problem repeated many times. It only gets large in aggregate, and the aggregate splits cleanly by hotel.</p>
+  </div>
+  <div class="scroll">
+  <table class="ref">
+    <thead><tr><th>Sizing</th><th>Number</th><th>Basis</th></tr></thead>
+    <tbody>
+      <tr><td>GL accounts with activity, per hotel</td><td>1,900 to 3,000</td><td>Measured on six large hotels, trailing twelve months of actuals</td></tr>
+      <tr><td>One scenario, one hotel</td><td>Under 100K cells</td><td>Estimate: 3,000 lines × 18 months, plus about 60 daily series × 550 days</td></tr>
+      <tr><td>A typical edit</td><td>Hundreds of cells</td><td>One line, its dependents, the months in range</td></tr>
+      <tr><td>Write-through to account_values</td><td>Hundreds of rows per edit, thousands per nightly refresh</td><td>Estimate. Changed monthly cells only; daily lines go to account_values_daily</td></tr>
+      <tr><td>Custom scenarios</td><td>About 36K fact rows per hotel each, five per hotel</td><td>Estimate: 2,000 lines × 18 months. Five each at 500 hotels is 90M rows, about the size of account_values today</td></tr>
+      <tr><td>Locked snapshots, 500 hotels</td><td>About 320M rows a year</td><td>Estimate: 16 locks a year × 40K rows. Similar to otb_segment today (144M live, 322M in the old table)</td></tr>
+      <tr><td>Transactions, 500 hotels</td><td>20M to 50M rows a year</td><td>Estimate: 3,000 to 8,000 GL lines per hotel per month</td></tr>
+      <tr><td>Current instance</td><td>Postgres 17.9 on RDS, 536 GB</td><td>16 GB shared buffers, 16 parallel workers; pg_partman, pg_cron and plv8 are on the allowed list</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="cols">
+    <div class="panel">
+      <h3>Calculate in SQL, by dependency level</h3>
+      <p>The driver vocabulary is closed (nine methods), so the engine is a handful of set-based statements run once per dependency level: statistics, then lines driven by statistics, then subtotals, then lines that are a percent of subtotals. Each line stores its level; cycles are rejected when a driver is saved.</p>
+      <p>One function, <code>planning.apply_patch()</code>, validates the change, writes the inputs, recalculates the dirty slice and returns the changed cells and headline KPIs. A full hotel recalculation should be well under a second and an edit a few milliseconds of database time. The grid updates the edited row locally and reconciles when the call returns.</p>
+      <p>The alternative is a TypeScript engine shared by browser and server. It gives instant previews of everything but puts the numbers in two places and adds a worker tier. I would only go there if customers need free-form formulas.</p>
+    </div>
+    <div class="panel">
+      <h3>Live everywhere: write through to the fact table</h3>
+      <p>The working forecast is a real version in <code>account_values</code> (and <code>account_values_daily</code> for daily lines), called <code>working</code>. Each recalculation upserts only the cells whose value changed, in the same transaction as <code>planning.result</code>. Because the cube computes rollups on read, dashboards, Excel and MCP show the new number on their next query.</p>
+      <p>For a hotel on the planner, <code>latest_forecast</code> resolves to <code>working</code>. Locks are copied to <code>forecastN</code>, <code>forecastN.M</code> and <code>budget</code> exactly as file loads are today, so forecast accuracy and as-of-date logic keep comparing against frozen versions.</p>
+      <p>The other route is to have the cube read <code>planning.result</code> directly. I would avoid it: it puts a second source inside the most performance-sensitive function in the database.</p>
+    </div>
+    <div class="panel">
+      <h3>Version registry, in the first release</h3>
+      <p>Adding <code>working</code> means touching every function that hard-codes the version list. Do that once, as a table: version key, family (actual, budget, forecast, proforma), author (operator or owner), kind (official, weekly, working), month and revision, rank for "latest", and whether it bypasses the validation gate. Seed it with today's ninety-odd values and prove parity before anything else changes.</p>
+      <p>The same table lets an owner's forecast sit beside the operator's: <code>owner_working</code>, <code>owner_forecast3</code>, <code>owner_budget</code>, visible only to the authoring company. The owner screens can wait; the keys are expensive to retrofit.</p>
+    </div>
+    <div class="panel">
+      <h3>Custom scenarios and one version list</h3>
+      <ul>
+        <li><b>Any scenario can be saved under a name,</b> from the working forecast or a what-if, and kept live or locked. Official locks keep the forecastN and forecastN.M names. Everything else gets its own registry row: key, label, company, hotels, kind, author, locked at.</li>
+        <li><b>Every version dropdown reads one function.</b> For the hotels in view it returns the system versions that have data plus the custom scenarios the caller's company can see. The app, Excel and MCP all use it, so nothing lists versions by hand.</li>
+        <li><b>Five custom scenarios per hotel, for now.</b> Each is written to the fact table like <code>working</code> and shows everywhere, at about 36,000 rows per hotel. Archiving one frees its slot and removes its fact rows; it stays viewable in the planner. What-ifs do not count: they are temporary and stay in the planner.</li>
+        <li><b>Fork: follows its source.</b> Made from the working forecast or any other scenario. It stores only its own changes, each either a replacement ("group rooms are 1,200 in July") or an adjustment to the source's value ("occupied rooms 8% lower, June to September"), and reads everything else from the source each time it recalculates.</li>
+        <li><b>A fork follows</b> actuals as months close, the top line feed where it left the top line alone, every driver it did not change, newly enabled accounts, and all the lines calculated from those. <b>It does not follow</b> a driver it replaced: that stays as set even if the source's moves, and the fork's change list flags it. Forks recalculate from the queue after their source changes, a few seconds behind it.</li>
+        <li><b>Copy: independent.</b> A full copy of the drivers that no longer follows its source. It still takes actuals as months close. Feed-driven lines such as an RMS top line are frozen at their values when copied, so a copy moves only with actuals and its own edits.</li>
+        <li><b>Snapshot: fully locked.</b> A frozen copy of drivers and results that does not change, even when actuals arrive. Official locks are snapshots.</li>
+        <li><b>How they relate.</b> Whether a scenario takes actuals is its own property, so a fork of a snapshot is live. A fork can be detached into a copy, and anything can be snapshotted. A snapshot cannot be reopened, only forked or copied. Archiving a scenario turns its forks into copies.</li>
+        <li><b>Scenarios are defined per company,</b> with a list of hotels, so the same scenario rolls up across them in a portfolio view. A hotel that is not in the scenario contributes its working forecast to that rollup, which needs a fallback rule in the version resolver.</li>
+        <li><b>Latest forecast, forecast accuracy and as-of logic ignore custom scenarios.</b></li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h3>Built on the single-pass cube (PR 114)</h3>
+      <ul>
+        <li><b>No use of <code>account_map_cache</code> anywhere in the planner.</b> Sets, grouping and write-through read <code>account_map</code>, <code>mapping_override</code> and <code>account_ancestor_map</code> directly, as the new cube does.</li>
+        <li><b>One resolver.</b> Lift PR 114's account-to-line lookup into a shared function, so the planner and the cube cannot disagree about where an account maps.</li>
+        <li><b>A mapping change queues a recalculation.</b> Without the cache the cube reflects a remap at once, but percent-of-set lines hold calculated values until the planner recalculates.</li>
+        <li><b>Registry after the switch.</b> PR 114 removes <code>get_financial_data_ib</code> and <code>_lf</code> and moves latest-forecast handling into <code>get_financial_data_cells</code>. Build the registry and <code>working</code> on those functions after its switch and cleanup, so nothing is converted twice.</li>
+        <li><b>Every cube reader is coming off the cache,</b> the daily cube included, and the planner does not wait for that. Its monthly and daily write-through only add rows to the fact tables; whichever cube reads them resolves the mapping itself.</li>
+        <li><b>A live version is cheap for the new cube.</b> It adds months per hotel account before mapping, so <code>working</code> is one more version of facts, and the PR measures mapping at about 6 microseconds an account per call.</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h3>Live versus locked</h3>
+      <ul>
+        <li><b>Working forecast.</b> One per hotel, live everywhere as the <code>working</code> version. Closed months are actuals. Open months are calculated. It moves when drivers, actuals or feeds move.</li>
+        <li><b>Open month.</b> Daily lines are actual to date plus forecast for the remaining days. Monthly expense lines keep the forecast until close and show posted-to-date beside it.</li>
+        <li><b>Official lock.</b> An immutable copy of inputs and results. Monthly and weekly locks keep the forecastN and forecastN.M names.</li>
+        <li><b>Custom scenario.</b> Any name, defined per company, made from the working forecast or any other scenario as a fork (follows its source), a copy (independent, still takes actuals) or a snapshot (fully locked). Up to five per hotel. It appears in every version dropdown.</li>
+        <li><b>Budget.</b> The same model on a different scenario. No approval workflow in v1: a permitted user locks it.</li>
+        <li><b>What-if.</b> An unpublished branch of any scenario; the agent previews proposals in one. Saving it under a name makes it a custom scenario.</li>
+        <li><b>Flex.</b> The budget's drivers recalculated on actual statistics. With a driver model this costs nothing extra.</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h3>What needs care</h3>
+      <ul>
+        <li><b>Partition <code>planning.result</code> and <code>ledger.transaction</code> from the first migration</b> (by hotel hash and by posting month). account_values at 45 GB unpartitioned is the cautionary case.</li>
+        <li><b>Thin old snapshots.</b> Keep monthly line totals; drop component and daily detail after a set age.</li>
+        <li><b>Write only changed cells.</b> account_values is 45 GB and unpartitioned. An edit should touch hundreds of rows there and a nightly feed refresh thousands, never the whole scenario.</li>
+        <li><b>Triggers.</b> The provisional-validation trigger fires on every insert statement and must skip versions the registry marks as bypassing validation. The cache-maintenance trigger goes away with the cache, so a new account needs a mapping before its first write or the cube will not place it.</li>
+        <li><b>First appearance lags.</b> A hotel's first working rows for a period become "latest" after the next five-minute status rebuild. Later edits to existing rows show immediately. PR 112's incremental status job would shorten the first lag.</li>
+        <li><b>Legacy</b> receives the working version in the nightly copy and ignores it until its own version lists learn the key.</li>
+        <li><b>Concurrency.</b> Row versions on components so two people editing one hotel do not overwrite each other; departments edit their own lines.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="prose">
+    <h3>When recalculation runs</h3>
+  </div>
+  <div class="scroll">
+  <table class="ref">
+    <thead><tr><th>Event</th><th>What happens</th><th>When</th></tr></thead>
+    <tbody>
+      <tr><td>A person or the agent edits a driver</td><td>Dirty slice recalculated and the changed cells written through to account_values, inside the same call</td><td>Immediately</td></tr>
+      <tr><td>Transactions or a trial balance arrive</td><td>Hotel and period marked dirty in the queue; a worker coalesces per hotel and recalculates once things go quiet</td><td>A minute or two, never per transaction</td></tr>
+      <tr><td>A month closes (validated)</td><td>Month becomes actual in the working forecast; ratios compared with drivers; agent review queued</td><td>On validation</td></tr>
+      <tr><td>RMS, pace or labor feed loads</td><td>Fed lines refreshed, dependents marked dirty</td><td>After each load, nightly for most</td></tr>
+      <tr><td>Template changes</td><td>Hotels that inherit the line are marked dirty</td><td>Queued</td></tr>
+      <tr><td>Mapping, override or hierarchy changes</td><td>Planner hotels with affected accounts or sets are marked dirty</td><td>Queued</td></tr>
+      <tr><td>An account is enabled or turned off</td><td>Its line is created or its components ended; dependents recalculated</td><td>Immediately</td></tr>
+      <tr><td>Manual refresh</td><td>Full recalculation of one scenario</td><td>On demand</td></tr>
+      <tr><td>Locked scenarios</td><td>Nothing</td><td>Never</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="note"><b>Stack.</b> Postgres for definitions, calculation and results. Hasura exposes the patch and read functions, as it does for the rest of the app. The queue worker is pg_cron draining a table with skip-locked. Lambdas are for the accounting connectors and the agent only, following the existing event-trigger pattern. The grid is a virtualized table in the existing UI behind a module entitlement.</div>
+</section>
+
+<!-- ================= FEEDS ================= -->
+<section class="sec" id="sec-feeds" hidden>
+  <div class="prose">
+    <h2>Actuals and transactions</h2>
+    <p>Two steps. First, GL-detail files through the report-type pipeline you already run, landing in <code>ledger.transaction</code> instead of being collapsed. Second, API connectors where the system has a good API. The trial balance stays as the control total: transactions summed by account and month must tie to it, and that check feeds the existing validation status.</p>
+    <p>All three v1 systems start on files. That also covers the case where the owner is the customer and the operator runs the books. The M3, Intacct and Duetto rows reflect a quick check of public material on 18 November; confirm against a customer tenant.</p>
+  </div>
+  <div class="scroll">
+  <table class="ref">
+    <thead><tr><th>System</th><th>Likely path</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>M3 · v1</td><td>Scheduled GL-detail export through the report-type pipeline</td><td>M3's public API is inbound: PMS and POS systems post to the daily report. Folio and Trintech have partner connections that read vendors, GL codes and entities, so outbound access exists but is arranged with M3 directly. Start that conversation now and ship on files.</td></tr>
+      <tr><td>Sage Intacct · v1</td><td>GL-detail export first, then the XML API querying GL entries by modified date</td><td>The documented query objects are GLDETAIL and GLENTRY. Third-party guides recommend GLENTRY for speed and a modified-date filter for incremental pulls. First real connector.</td></tr>
+      <tr><td>PeopleSoft · v1</td><td>Scheduled query extract to SFTP</td><td>On-premise at brand-managed operators. Files only.</td></tr>
+      <tr><td>Owner is the customer</td><td>GL extract reports from the operator</td><td>No credentials to the operator's system. Same landing table, lower frequency.</td></tr>
+      <tr><td>NetSuite, Workday · later</td><td>SuiteQL over transaction lines; a Workday custom report as a web service</td><td>You already load an HHM Workday extract; journal lines are the same mechanism.</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="prose">
+    <h2>Top line</h2>
+    <p>Rooms and rate from the best source available, with the source shown on the row. Grain is a hotel setting: by segment by day, or by month.</p>
+  </div>
+  <div class="scroll">
+  <table class="ref">
+    <thead><tr><th>Source</th><th>Status</th><th>Use</th></tr></thead>
+    <tbody>
+      <tr><td>IDeaS · v1</td><td>Forecast columns already land in raw.ideas_busview and are unused.</td><td>Default for transient segments. Needs a transformer, not a new feed.</td></tr>
+      <tr><td>Duetto · v1</td><td>No public forecast-export documentation found. Plan on a scheduled report file and ask Duetto about API access.</td><td>Same landing shape as IDeaS: rooms and rate by segment by stay date.</td></tr>
+      <tr><td>Monthly entry · v1</td><td>New. Rooms and ADR typed by month, optionally by major segment.</td><td>Owner-level forecasting, and hotels without an RMS feed.</td></tr>
+      <tr><td>Group pace · later</td><td>Delphi pace already loads into otb_segment.</td><td>Definites and tentatives by day, layered over actuals as ProfitSage's Defs and Tents datasets do.</td></tr>
+      <tr><td>Singlepane baseline</td><td>New, built from on-the-books plus historical pickup, which Future Insights already computes.</td><td>Hotels with no RMS, and a second opinion beside the RMS.</td></tr>
+      <tr><td>Manual</td><td>Typed or pasted in the daily grid, or pushed from the Excel add-in.</td><td>Overrides and segments no system covers.</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="note"><b>Day and month together.</b> Each line has a native grain. Revenue and statistics are daily or monthly, per the hotel's setting; expenses are monthly and read the month totals. A daily view of a monthly line is spread on read by a weekday and occupancy profile and is not stored.</div>
+</section>
+
+<!-- ================= AGENT ================= -->
+<section class="sec" id="sec-agent" hidden>
+  <div class="prose">
+    <h2>AI-native, in two directions</h2>
+    <p><b>You tell it.</b> "Update the forecast for the new laundry pricing from June 1." The agent finds the line and component, reads the contract if it is in Contracts, drafts a patch, shows the dollar impact in a what-if, and applies it when approved.</p>
+    <p><b>It tells you.</b> Cheap SQL detectors run after each ledger sync and month close. An LLM step turns each finding into an explanation, a proposed patch and, when the right answer depends on something only a person knows, a question.</p>
+  </div>
+  <div class="cols">
+    <div class="panel">
+      <h3>Tools (MCP and in-app, same functions as the grid)</h3>
+      <ul>
+        <li><code>explain_line</code>: components, drivers, history, recent transactions</li>
+        <li><code>preview_patch</code>: impact by month and on GOP, in a what-if</li>
+        <li><code>apply_patch</code>: writes the change with reason and evidence</li>
+        <li><code>list_suggestions</code>, <code>answer_suggestion</code></li>
+        <li><code>compare_scenarios</code>: a bridge between two forecasts by driver</li>
+        <li><code>lock_scenario</code></li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h3>Detectors</h3>
+      <ul>
+        <li>A recurring vendor charge steps up or down and stays there</li>
+        <li>A new vendor appears twice on the same account</li>
+        <li>An expected recurring invoice is missing near close</li>
+        <li>Actual cost per unit drifts from the driver for three months</li>
+        <li>A one-off spike that should not enter the run rate</li>
+        <li>An annual item lands in a different month than planned</li>
+        <li>Posted-to-date already exceeds the month's forecast</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h3>Policy, by account and threshold</h3>
+      <ul>
+        <li><b>Off.</b> The agent reports and never proposes. A sensible default for wages.</li>
+        <li><b>Ask.</b> A question to the line's owner through Scout's commentary thread; the answer becomes the patch and the comment.</li>
+        <li><b>Suggest.</b> Queue for approval with evidence and impact.</li>
+        <li><b>Autopilot.</b> Apply when the change is under the account's limits (dollars a month, percent, kind of change), report afterward, one-click undo.</li>
+      </ul>
+      <p>Policy rows sit on the operator template, hotel, department or account, and the most specific wins. An automatic change is attributed to the policy and to the person who set it; the line's owner stays accountable. Locked scenarios are never touched.</p>
+    </div>
+    <div class="panel">
+      <h3>Better drivers than they have today</h3>
+      <ul>
+        <li><b>History seed.</b> Every line gets a starting driver from its own actuals, so a hotel has a full model on day one.</li>
+        <li><b>Driver discovery.</b> For each account, fit candidate drivers (occupied rooms, arrivals, guests, covers, revenue, days) against 24 to 36 months. The intercept is the fixed part and the slope the variable rate. Recurring vendors in the ledger become named components.</li>
+        <li><b>Driver fit check.</b> On every line, a drawer tab applies today's drivers to the actual volumes of the last 12 months and compares the result with what posted: average error, bias and the worst month. Those figures are calculated by the engine, the same calculation as flex, so they come out the same every time. Where transactions are matched to components, the check can run per component.</li>
+        <li><b>Fit suggestions are the agent's.</b> The engine screens every line cheaply and passes the agent the ones that fit badly, with candidate fits, the ledger and any contract. The agent decides what the miss is (a fixed base, a price step, a one-time invoice to leave out, a different driver), writes the proposal, and the engine scores it on the same 12 months before it is shown. It lands in the same inbox, under the same account policy, as every other suggestion.</li>
+        <li><b>ProfitSword import.</b> Where a customer can export it, their driver and ratio per account loads as the baseline, and the agent lists where the fit says a different driver or a fixed and variable split would forecast better.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="note"><b>Where Singlepane starts ahead.</b> Years of GL history build a first driver set without anyone typing a ratio. Pace seeds the top line. Hotel Effectiveness standards can seed labor ratios. Later, and not in v1: contract terms seeding fixed components and escalators, and loans with the rate curve forecasting debt service.</div>
+</section>
+
+<!-- ================= QUESTIONS ================= -->
+<section class="sec" id="sec-questions" hidden>
+  <div class="prose"><h2>Decisions from 18 November</h2></div>
+  <div class="scroll">
+  <table class="ref">
+    <thead><tr><th>Topic</th><th>Decision</th><th>What it changes</th></tr></thead>
+    <tbody>
+      <tr><td>First user</td><td>An operator, replacing ProfitSword or with nothing today. No approvals in v1.</td><td>GL-level inputs by department. A permitted user locks. Workflow tables untouched.</td></tr>
+      <tr><td>Owner and operator forecasts together</td><td>Potentially</td><td>The version registry moves into the first release, with an author on every version. Owner screens wait.</td></tr>
+      <tr><td>Live forecast</td><td>Shown everywhere, as in ProfitSword</td><td>The working forecast is written through to account_values as <code>working</code>, and <code>latest_forecast</code> resolves to it.</td></tr>
+      <tr><td>Labor depth</td><td>GL level, built from components</td><td>Headcount method added; hours stored as statistics. No positions, schedules or payroll feed.</td></tr>
+      <tr><td>Accounting systems</td><td>M3, Sage, PeopleSoft. GL extracts when the owner is the customer.</td><td>All three start on GL-detail files. Intacct is the first API connector.</td></tr>
+      <tr><td>Top line</td><td>IDeaS and Duetto, with monthly grain as an option</td><td>Top-line grain is a hotel setting. Monthly entry ships first.</td></tr>
+      <tr><td>Group definites and tentatives</td><td>Eventually</td><td>Not in v1.</td></tr>
+      <tr><td>Autopilot</td><td>By threshold and account</td><td>A policy table with limits per account; the most specific row wins.</td></tr>
+      <tr><td>Calendar</td><td>Calendar year, rolling 12, 18 or 24, trailing-twelve lookback, no 13-period</td><td>Horizon is a model setting. No period-calendar table.</td></tr>
+      <tr><td>Below GOP from contracts and loans</td><td>No</td><td>Below-GOP lines are ordinary typed lines.</td></tr>
+      <tr><td>Migration</td><td>ProfitSword setup as an optional start; aim for better drivers</td><td>History seed and driver discovery are the main path. An import is a baseline to improve on.</td></tr>
+      <tr><td>Multi-property, multi-currency</td><td>Not in v1</td><td>One hotel per model.</td></tr>
+      <tr><td>Driver sets and grouping</td><td>No operator hierarchies on day one, but sets of GLs must drive other accounts and GLs must group by type</td><td>A set is a USALI node resolved per hotel, with includes and excludes. The workspace groups by each GL's USALI department and category.</td></tr>
+      <tr><td>Stat accounts</td><td>Stat chains write both the stat GL and the amount GL</td><td>A stat pair table on the operator chart: suffix accounts pair automatically, own stat GLs are paired once by proposal and approval, and a -STAT account is created where none exists.</td></tr>
+      <tr><td>Chart of accounts</td><td>Review and edit the full chart; enable or deactivate accounts for forecast and budget; a hotel can start using a new GL</td><td>An operator chart screen and a per-hotel status with dates. Enabling requires a mapping. Actuals on an account that is off raise a flag.</td></tr>
+      <tr><td>Mapping cache</td><td><code>account_map_cache</code> is being removed; assume every cube reader comes off it</td><td>The planner resolves mapping when it calculates and reads, through the same lookup as the single-pass cube, and does not wait on the remaining conversions. The version registry is built after PR 114's switch.</td></tr>
+      <tr><td>Driver fit check</td><td>A drawer tab showing how accurate each line's drivers have been over the last 12 months, with average error and a suggested improvement</td><td>The error figures are calculated by the engine, on read. The suggestion is written by the forecast agent, like its other suggestions, and scored by the engine before it is shown.</td></tr>
+      <tr><td>Custom scenarios</td><td>Custom scenarios and versions can be saved, locked and snapshotted, and dropdowns show whatever has been created</td><td>Each named scenario gets a registry row. One function returns the version list for the hotels in view, and every dropdown in the app, Excel and MCP reads it.</td></tr>
+      <tr><td>Custom scenario scope and limit</td><td>Defined per company; five per hotel for now</td><td>The same scenario rolls up across a company's hotels. Each hotel holds at most five; archiving one frees a slot.</td></tr>
+      <tr><td>Making a scenario</td><td>Three options from any scenario: a fork follows its source; a copy is independent but still takes actuals; a snapshot is fully locked and ignores actuals</td><td>A fork stores a change list. A copy and a snapshot store full copies. Taking actuals is the scenario's own property, not inherited from its source.</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="prose">
+    <h2>Build order for v1</h2>
+    <ul>
+      <li><b>Spike.</b> Rebuild one real hotel's current operator forecast from seeded drivers and see how close the engine gets. In parallel, land GL detail for one operator.</li>
+      <li><b>Version registry.</b> After PR 114's switch and cleanup: replace the hard-coded lists with a table, prove parity, add <code>working</code>.</li>
+      <li><b>Chart of accounts.</b> Operator chart review, per-hotel enable and deactivate, stat pairing.</li>
+      <li><b>Monthly expenses and labor.</b> Engine, forecast workspace, components including headcount, operator templates, write-through, locks to forecastN.</li>
+      <li><b>Top line.</b> Monthly entry first, then the daily grid with IDeaS and Duetto, and F&amp;B stat chains.</li>
+      <li><b>Transactions.</b> GL-detail files for M3, Sage and PeopleSoft, drill-through, component matching.</li>
+      <li><b>Agent.</b> Chat edits and driver discovery first, then suggestions, then autopilot under account policies.</li>
+      <li><b>Not in v1.</b> Approvals, Delphi definites and tentatives, below-GOP lines seeded from contracts and loans, shared services and allocations, multi-currency, operator hierarchies, API connectors beyond Intacct, owner screens.</li>
+    </ul>
+  </div>
+  <div class="prose"><h2>Still open</h2></div>
+  <ol class="q">
+    <li><b>Should "latest forecast" mean the live working forecast everywhere for a hotel on the planner?</b> I have assumed yes, which matches ProfitSword's Primary Forecast. The alternative is the last locked forecast, with working as a version people choose.</li>
+    <li><b>Is an owner's forecast private to the owner?</b> I have assumed the operator cannot see owner versions and the owner sees the operator's as today.</li>
+    <li><b>Do department heads enter their own sections in v1,</b> with edit rights by department, or does one finance user per hotel own the whole forecast?</li>
+    <li><b>Can a friendly customer export their ProfitSword driver setup?</b> That decides whether the import is real or theoretical.</li>
+    <li><b>Who at M3 and at Duetto can answer the outbound-data question?</b> Folio and Trintech already have M3 connections, so the access exists.</li>
+    <li><b>Which hotel is the spike hotel?</b> Ideally one where you receive the operator's ProfitSword forecast and have several years of GL history, so the engine's output can be compared line by line.</li>
+    <li><b>In a copy, should feed-driven lines such as an RMS top line freeze at their values when copied?</b> I have assumed yes, so a copy moves only with actuals and its own edits.</li>
+    <li><b>Who approves stat pairings for an operator with its own stat GLs:</b> Singlepane ops at onboarding, or the operator's finance team?</li>
+    <li><b>Does v1 need to be in customers' hands for the 2028 budget season?</b> Operators start budgets in late summer, which would put the engine, workspace and monthly top line ahead of everything else.</li>
+  </ol>
+</section>
+</div>
+
+<script>
+(function(){
+'use strict';
+var MO=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+var DAYS=[31,28,31,30,31,30,31,31,30,31,30,31];
+var ROOMS=312, CLOSED=2;
+var occ=[5820,6105,7310,7480,7690,7905,8120,7985,7240,7455,6380,5610];
+var adr=[188,194,212,219,224,231,236,229,221,226,204,192];
+function fmt(n){return Math.round(n).toLocaleString('en-US');}
+function el(id){return document.getElementById(id);}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');}
+
+/* ---------- daily top line (March 2026, the 1st is a Sunday) ---------- */
+var TODAY=15, DOW=['Su','Mo','Tu','We','Th','Fr','Sa'];
+var SEG=[
+ {id:'ret',grp:'Transient',name:'Retail',src:'IDeaS',base:62,adr:238,dow:[.75,.9,1.1,1.15,1.1,1.05,1]},
+ {id:'dis',name:'Discount',src:'IDeaS',base:38,adr:196,dow:[.9,.8,.85,.85,.9,1.25,1.35]},
+ {id:'neg',name:'Negotiated',src:'IDeaS',base:44,adr:214,dow:[.35,1.1,1.4,1.45,1.2,.4,.3]},
+ {id:'qua',name:'Qualified',src:'IDeaS',base:16,adr:171,dow:[.6,1.1,1.2,1.2,1.1,.7,.6]},
+ {id:'whl',name:'Wholesale',src:'Manual',base:18,adr:158,dow:[1,.8,.8,.8,.9,1.3,1.4]},
+ {id:'gco',grp:'Group',name:'Corporate',src:'Delphi',base:26,adr:221,dow:[.3,1.2,1.6,1.6,1.1,.2,.1]},
+ {id:'gas',name:'Association',src:'Delphi',base:14,adr:229,dow:[.5,1.3,1.5,1.5,1.2,.5,.4]},
+ {id:'gsm',name:'SMERF',src:'Delphi',base:12,adr:184,dow:[1.2,.4,.3,.3,.6,1.8,2]},
+ {id:'crw',grp:'Contract',name:'Airline crew',src:'Contract block',base:18,adr:129,dow:[1,1,1,1,1,1,1]}
+];
+SEG.forEach(function(s,i){
+  s.rooms=[];s.rate=[];
+  for(var d=0;d<31;d++){var w=d%7;
+    s.rooms.push(Math.round(s.base*s.dow[w]*(1+(((d*37+i*17)%11)-5)/100)));
+    s.rate.push(Math.round(s.adr*(.94+s.dow[w]*.06)*(1+(((d*13+i*7)%9)-4)/200)));
+  }
+});
+function dayTot(d){return SEG.reduce(function(t,s){return t+s.rooms[d];},0);}
+function dayRev(d){return SEG.reduce(function(t,s){return t+s.rooms[d]*s.rate[d];},0);}
+function syncMarch(){var r=0,v=0;for(var d=0;d<31;d++){r+=dayTot(d);v+=dayRev(d);}occ[2]=r;adr[2]=v/r;}
+syncMarch();
+
+/* ---------- forecast model ---------- */
+var LINES=[
+ {id:'rev',grp:'Rooms · Revenue',name:'Rooms revenue',acct:'CHG-100-400000',usali:'Total Rooms Revenue - 100',sign:1,bud:1,stat:{unit:'Rooms sold',acct:'CHG-100-990100',how:'operator stat GL, paired once on the operator chart'},
+  comps:[{label:'Daily top line',method:'top'}]},
+ {id:'bfast',grp:'Food and beverage · Revenue',name:'Restaurant breakfast',acct:'CHG-210-410100',usali:'Breakfast Food Revenue - 210',sign:1,bud:1.03,stat:{unit:'Covers',acct:'CHG-210-410100-STAT',how:'stat ledger, paired by the -STAT suffix'},
+  comps:[{label:'Breakfast covers',method:'unit',driver:'occ',ratio:.34,ratioUnit:'capture',rate:24.5,rateUnit:' check',pf:'ratio'}]},
+ {id:'mgmt',grp:'Rooms · Salaries, wages and bonuses',name:'Rooms management salaries',acct:'CHG-100-600100',usali:'Rooms Management Salaries - 100',sign:-1,bud:1,
+  comps:[{label:'Salaried team',method:'fixed',amt:41200}],vendors:['Payroll journal']},
+ {id:'fd',name:'Front desk wages',acct:'CHG-100-601200',usali:'Front Office Wages - 100',sign:-1,bud:.99,stat:{unit:'Hours',acct:'CHG-100-601200-STAT',how:'stat ledger, paired by the -STAT suffix'},
+  comps:[{label:'Base coverage',method:'unit',driver:'days',ratio:48,ratioUnit:'hrs a day',rate:19.4,rateUnit:' an hour'},
+         {label:'Volume staffing',method:'unit',driver:'occ',ratio:.09,ratioUnit:'hrs per occ room',rate:19.4,rateUnit:' an hour'}],vendors:['Payroll journal']},
+ {id:'hk',name:'Housekeeping wages',acct:'CHG-100-601400',usali:'Housekeeping Wages - 100',sign:-1,bud:.97,stat:{unit:'Hours',acct:'CHG-100-601400-STAT',how:'stat ledger, paired by the -STAT suffix'},
+  comps:[{label:'Supervisor',method:'fte',fte:1,hrs:173,rate:26,rateUnit:' an hour'},
+         {label:'Room attendants',method:'unit',driver:'occ',ratio:.5,ratioUnit:'hrs per occ room',rate:20,rateUnit:' an hour'}],vendors:['Payroll journal']},
+ {id:'ptb',grp:'Rooms · Payroll-related expenses',name:'Payroll taxes and benefits',acct:'CHG-100-605000',usali:'Payroll Taxes and Benefits - 100',sign:-1,bud:.98,
+  comps:[{label:'Taxes and benefits',method:'pct',pct:31.5,of:['mgmt','fd','hk'],ofLabel:'Rooms salaries and wages',setNode:'Total Salaries Wages & Bonuses - 100',pf:'pct'}],vendors:['Payroll journal','Benefits carrier']},
+ {id:'gs',grp:'Rooms · Other expenses',name:'Guest supplies',acct:'CHG-100-612100',usali:'Guest Supplies - 100',sign:-1,bud:.96,
+  comps:[{label:'Amenities and paper',method:'unit',driver:'occ',rate:4.85,rateUnit:' per occ room',pf:'rate'}],vendors:['Seaboard Hospitality Supply','Northline Paper']},
+ {id:'ldy',name:'Laundry and dry cleaning',acct:'CHG-100-612300',usali:'Laundry and Dry Cleaning - 100',sign:-1,bud:1.01,
+  comps:[{label:'Linen service · Crisp Linen',method:'unit',driver:'occ',rate:2.1,rateUnit:' per occ room'},
+         {label:'Guest dry cleaning',method:'fixed',amt:1150},
+         {label:'Uniform cleaning',method:'fixed',amt:640}],
+  tx:[{d:'Feb 03',v:'Crisp Linen Co.',ref:'CL-88012',amt:3105,comp:'Linen service'},
+      {d:'Feb 10',v:'Crisp Linen Co.',ref:'CL-88077',amt:3240,comp:'Linen service'},
+      {d:'Feb 17',v:'Crisp Linen Co.',ref:'CL-88141',amt:3310,comp:'Linen service'},
+      {d:'Feb 22',v:'Crisp Linen Co.',ref:'CL-88214',amt:1940,comp:'',flag:1},
+      {d:'Feb 24',v:'Crisp Linen Co.',ref:'CL-88203',amt:3165,comp:'Linen service'},
+      {d:'Feb 26',v:'Harbor Dry Cleaners',ref:'HDC-2291',amt:1150,comp:'Guest dry cleaning'},
+      {d:'Feb 27',v:'Tidewater Uniform',ref:'TU-66120',amt:640,comp:'Uniform cleaning'}]},
+ {id:'ops',name:'Operating supplies',acct:'CHG-100-612500',usali:'Operating Supplies - 100',sign:-1,bud:1.02,
+  fitWhy:'Seaboard Hospitality Supply has invoiced the standing order at close to $6,000 a month whatever the occupancy (12 invoices), while Dockside Janitorial consumables track occupied rooms. The current split puts too little in the fixed part.',
+  comps:[{label:'Standing order',method:'fixed',amt:2300},
+         {label:'Consumables',method:'unit',driver:'occ',rate:1.15,rateUnit:' per occ room'}],vendors:['Seaboard Hospitality Supply','Dockside Janitorial']},
+ {id:'cs',name:'Contract services',acct:'CHG-100-613000',usali:'Contract Services - 100',sign:-1,bud:1,
+  comps:[{label:'Elevator maintenance',method:'fixed',amt:1850},
+         {label:'Pest control',method:'fixed',amt:420},
+         {label:'Window cleaning',method:'plan',plan:[0,0,0,4200,0,0,0,0,0,4200,0,0]},
+         {label:'Carpet deep clean',method:'plan',plan:[6500,0,0,0,0,0,6500,0,0,0,0,0]}],vendors:['Summit Elevator','Bayline Pest']},
+ {id:'tac',name:'Travel agent commissions',acct:'CHG-100-614000',usali:'Commissions - 100',sign:-1,bud:1.04,
+  comps:[{label:'Commissions',method:'pct',pct:2.6,of:['rev'],ofLabel:'Rooms revenue',setNode:'Total Rooms Revenue - 100',pf:'pct'}],vendors:['Commission clearing']}
+];
+var byId={};LINES.forEach(function(l){byId[l.id]=l;});
+var EXP=LINES.filter(function(l){return l.sign<0;}).map(function(l){return l.id;});
+function drv(k,m){return k==='occ'?occ[m]:DAYS[m];}
+function pv(c,f,m){return (c.pf===f&&c.ovr&&c.ovr[m]!=null)?c.ovr[m]:c[f];}
+function inRange(c,m){return !((c.from!=null&&m<c.from)||(c.to!=null&&m>c.to));}
+function compAmt(c,m){
+  if(!inRange(c,m))return null;
+  if(c.method==='top')return occ[m]*adr[m];
+  if(c.method==='unit')return drv(c.driver,m)*(c.ratio!=null?pv(c,'ratio',m):1)*pv(c,'rate',m);
+  if(c.method==='fixed')return pv(c,'amt',m);
+  if(c.method==='fte')return c.fte*c.hrs*c.rate;
+  if(c.method==='pct')return pv(c,'pct',m)/100*c.of.reduce(function(s,id){return s+calcLine(byId[id],m);},0);
+  if(c.method==='plan')return c.plan[m]||0;
+  return 0;
+}
+function calcLine(l,m){
+  if(m<CLOSED&&l.actual)return l.actual[m];
+  return l.comps.reduce(function(s,c){return s+(compAmt(c,m)||0);},0);
+}
+/* the statistic a component produces (hours, covers, rooms sold), written to the line's paired stat account */
+function compStat(c,m){
+  if(!inRange(c,m))return null;
+  if(c.method==='top')return occ[m];
+  if(c.method==='unit'&&c.ratio!=null)return drv(c.driver,m)*pv(c,'ratio',m);
+  if(c.method==='fte')return c.fte*c.hrs;
+  return null;
+}
+function lineStat(l,m){return l.comps.reduce(function(s,c){return s+(compStat(c,m)||0);},0);}
+/* actuals for closed months: the driver result with a little noise */
+LINES.forEach(function(l,i){
+  l.noise=[];var a=[];
+  for(var m=0;m<CLOSED;m++){var n=l.id==='rev'?1:1+(((i*5+m*3)%7)-3)/100;l.noise.push(n);a.push(calcLine(l,m)*n);}
+  l.actual=a;
+  l.log=[{who:'Coastal Hospitality standard',when:'Jan 4',text:'Line created from the operator rooms template.'}];
+});
+byId.ldy.actual[1]=16550; /* matches the February invoices, including the unexplained one */
+
+/* ---------- history for the driver fit check: Mar 2025 to Feb 2026 ---------- */
+var HM=[];for(var hh=0;hh<12;hh++)HM.push((2+hh)%12);
+var HLAB=HM.map(function(cm,h){return MO[cm]+(h<10?' 25':' 26');});
+var occH=HM.map(function(cm,h){return h>=10?occ[cm]:Math.round(occ[cm]*0.965*(1+(((h*7)%5)-2)/100));});
+function compAt(c,h){
+  var cm=HM[h];
+  if(c.method==='unit')return (c.driver==='occ'?occH[h]:DAYS[cm])*(c.ratio!=null?c.ratio:1)*c.rate;
+  if(c.method==='fixed')return c.amt;
+  if(c.method==='fte')return c.fte*c.hrs*c.rate;
+  if(c.method==='plan')return c.plan[cm]||0;
+  if(c.method==='pct')return c.pct/100*c.of.reduce(function(s,id){return s+byId[id].hist[h];},0);
+  return 0;
+}
+function predAt(l,h){return l.comps.reduce(function(s,c){return s+(inRange(c,CLOSED)?compAt(c,h):0);},0);}
+/* what actually happened: mostly the driver plus noise; operating supplies is more fixed than its driver says */
+var TRUTH={ops:function(h){return 6400+0.52*occH[h];}};
+var AMP={rev:0,bfast:.04,mgmt:.01,fd:.02,hk:.02,ptb:.015,gs:.025,ldy:.03,ops:.02,cs:.04,tac:.015};
+LINES.forEach(function(l,i){
+  l.hist=[];
+  for(var h=0;h<12;h++){
+    if(h>=10){l.hist.push(l.actual[h-10]);continue;}
+    var base=l.id==='rev'?occH[h]*adr[HM[h]]*.97:(TRUTH[l.id]?TRUTH[l.id](h):predAt(l,h));
+    l.hist.push(base*(1+AMP[l.id]*((((h*17+i*29)%13)-6)/6)));
+  }
+});
+
+function snap(sc){
+  sc=sc||scen[0];
+  var o={occ:MO.map(function(_,m){return G('occ',m,sc);}),adr:MO.map(function(_,m){return G('adr',m,sc);})};
+  LINES.forEach(function(l){o[l.id]=MO.map(function(_,m){return G(l.id,m,sc);});if(l.stat)o['s:'+l.id]=MO.map(function(_,m){return GS(l,m,sc);});});
+  return o;
+}
+var scen=[{id:'work',label:'Working forecast',live:true}];
+(function(){
+  var base=snap();
+  scen.push({id:'f2',label:'Forecast 2',sub:'locked Mar 3',data:base});
+  var b={occ:occ.map(function(v){return Math.round(v*1.012);}),adr:adr.map(function(v){return v*1.01;})};
+  LINES.forEach(function(l){b[l.id]=MO.map(function(_,m){
+    var raw=l.comps.reduce(function(s,c){return s+(compAmt(c,m)||0);},0);
+    return (l.id==='rev'?b.occ[m]*b.adr[m]:raw*l.bud);});});
+  LINES.forEach(function(l){if(l.stat)b['s:'+l.id]=MO.map(function(_,m){return lineStat(l,m)*(l.id==='rev'?1.012:1);});});
+  /* budget for pct lines was computed off live lines; good enough for a mock */
+  scen.push({id:'bud',label:'2026 Budget',sub:'approved',data:b});
+  scen.splice(1,0,{id:'down',label:'Downside',sub:'fork of Working forecast · 1 change',custom:true,follow:true,dot:true,mods:[{months:[5,6,7,8],pct:-8}],note:'occupied rooms 8% lower in June to September'});
+})();
+function CMP(){return scen.filter(function(s){return s.id===state.cmp;})[0]||scen[scen.length-1];}
+var state={scen:'work',mode:'amt',sel:'ldy',tab:'drv',open:{ldy:true},metric:'rooms',grain:'day',cmp:'bud'};
+var prev={},first=true;
+function cur(){return scen.filter(function(s){return s.id===state.scen;})[0];}
+/* a live custom scenario is the working model with its own changes applied while it is being read */
+function modded(sc,fn){
+  if(!sc.mods)return fn();
+  var keep=occ.slice();
+  sc.mods.forEach(function(md){md.months.forEach(function(m){occ[m]=Math.round(keep[m]*(1+md.pct/100));});});
+  var r=fn();for(var i=0;i<12;i++)occ[i]=keep[i];return r;
+}
+function GS(l,m,sc){return sc.live?lineStat(l,m):sc.mods?modded(sc,function(){return lineStat(l,m);}):sc.data['s:'+l.id][m];}
+function G(id,m,sc){
+  sc=sc||cur();
+  if(id==='trev')return G('rev',m,sc)+G('bfast',m,sc);
+  if(id==='texp')return EXP.reduce(function(s,k){return s+G(k,m,sc);},0);
+  if(id==='rdp')return G('rev',m,sc)-G('texp',m,sc);
+  if(sc.mods)return modded(sc,function(){return id==='occ'?occ[m]:id==='adr'?adr[m]:calcLine(byId[id],m);});
+  if(!sc.live)return sc.data[id][m];
+  if(id==='occ')return occ[m];
+  if(id==='adr')return adr[m];
+  return calcLine(byId[id],m);
+}
+function FY(id,sc){var s=0;for(var m=0;m<12;m++)s+=G(id,m,sc);return s;}
+function addLog(l,who,text){l.log.unshift({who:who,when:'Just now',text:text});}
+
+/* ---------- text for a component ---------- */
+function compText(c){
+  if(c.method==='top')return 'Occupied rooms × ADR, from the daily top line';
+  if(c.method==='unit'){var d=c.driver==='occ'?'Occupied rooms':'Days';
+    return c.ratio!=null? d+' × '+c.ratio+' '+c.ratioUnit+' × $'+c.rate.toFixed(2)+c.rateUnit : '$'+c.rate.toFixed(2)+c.rateUnit;}
+  if(c.method==='fixed')return '$'+fmt(c.amt)+' a month, fixed';
+  if(c.method==='fte')return c.fte+' FTE × '+c.hrs+' hrs × $'+c.rate.toFixed(2)+c.rateUnit;
+  if(c.method==='pct')return c.pct+'% of '+c.ofLabel;
+  if(c.method==='plan'){var n=c.plan.filter(function(x){return x>0;}).length;return 'Scheduled in '+n+' months';}
+  return '';
+}
+function rangeText(c){
+  if(c.from!=null&&c.to!=null)return MO[c.from]+' to '+MO[c.to];
+  if(c.from!=null)return 'From '+MO[c.from]+' 1';
+  if(c.to!=null)return 'Through '+MO[c.to]+' '+DAYS[c.to];
+  return 'All year';
+}
+function chip(l){
+  if(l.id==='rev')return '<button class="chip feed" data-go="daily">Daily top line ›</button>';
+  var n=l.comps.length;
+  if(n===1)return '<button class="chip" data-sel="'+l.id+'">'+esc(compText(l.comps[0]))+'</button>';
+  return '<button class="chip multi" data-sel="'+l.id+'">'+n+' components</button>';
+}
+
+function statTag(l){return l.stat?'<span class="tag">'+esc(l.stat.unit)+'</span> '+l.stat.acct:'<span class="comp-m">No statistic</span>';}
+/* ---------- grid ---------- */
+function cellKey(id,m){return state.scen+':'+state.mode+':'+id+':'+m;}
+function td(id,m,val,html,cls){
+  var k=cellKey(id,m),changed=!first&&prev[k]!==undefined&&Math.round(prev[k]*100)!==Math.round(val*100);
+  prev[k]=val;
+  return '<td class="'+(m<CLOSED?'a ':'')+(cls||'')+(changed?' flash':'')+'">'+html+'</td>';
+}
+function varCell(fy,bud,sign){
+  var d=fy-bud;if(Math.abs(d)<.5)return '<td>0</td>';
+  var good=sign>0?d>0:d<0;
+  return '<td class="'+(good?'good':'bad')+'">'+(d>0?'+':'−')+fmt(Math.abs(d))+'</td>';
+}
+function implied(l,m){
+  var c=l.comps[0],a=G(l.id,m);
+  if(c.pf==='rate')return a/G('occ',m);
+  if(c.pf==='ratio')return a/(G('occ',m)*c.rate);
+  if(c.pf==='pct')return a/c.of.reduce(function(s,id){return s+G(id,m);},0)*100;
+  return 0;
+}
+function renderGrid(){
+  var sc=cur(),live=!!sc.live,rate=state.mode==='rate',h='';
+  h+='<thead><tr><th class="c-name">Line</th><th class="c-drv">How it is forecast</th>';
+  MO.forEach(function(mo,m){h+='<th class="'+(m<CLOSED?'a':'')+'">'+mo+(m<CLOSED?'<small>actual</small>':'')+'</th>';});
+  h+='<th>FY 2026</th><th>vs '+esc(CMP().label)+'</th></tr></thead><tbody>';
+  h+='<tr class="grp"><td colspan="16">Statistics</td></tr>';
+  h+='<tr><td class="c-name">Occupied rooms</td><td class="c-drv"><button class="chip feed" data-go="daily">Daily top line ›</button></td>';
+  for(var m=0;m<12;m++)h+=td('occ',m,G('occ',m),fmt(G('occ',m)));
+  h+='<td class="fy">'+fmt(FY('occ'))+'</td>'+varCell(FY('occ'),FY('occ',CMP()),1)+'</tr>';
+  h+='<tr><td class="c-name">ADR</td><td class="c-drv"><button class="chip feed" data-go="daily">Daily top line ›</button></td>';
+  for(m=0;m<12;m++)h+=td('adr',m,G('adr',m),'$'+G('adr',m).toFixed(2));
+  var fa=FY('rev')/FY('occ'),ba=FY('rev',CMP())/FY('occ',CMP());
+  h+='<td class="fy">$'+fa.toFixed(2)+'</td><td class="'+(fa>=ba?'good':'bad')+'">'+(fa>=ba?'+':'−')+Math.abs(fa-ba).toFixed(2)+'</td></tr>';
+  LINES.forEach(function(l){
+    if(l.grp)h+='<tr class="grp"><td colspan="16">'+l.grp+'</td></tr>';
+    var multi=l.comps.length>1,open=!!state.open[l.id];
+    h+='<tr class="'+(state.sel===l.id?'sel':'')+'"><td class="c-name">'+
+       (multi?'<button class="caret" data-tog="'+l.id+'" aria-label="Show components">'+(open?'▾':'▸')+'</button>':'<span class="caret"></span>')+
+       '<button class="linebtn" data-sel="'+l.id+'">'+esc(l.name)+'</button></td><td class="c-drv">'+(state.mode==='stat'?statTag(l):chip(l))+'</td>';
+    var c0=l.comps[0];
+    for(var m=0;m<12;m++){
+      var val=G(l.id,m);
+      if(state.mode==='stat'){var sv=l.stat?GS(l,m,sc):null;h+=td(l.id,m,sv||0,sv==null?'·':fmt(sv));continue;}
+      if(!rate){h+=td(l.id,m,val,fmt(val));continue;}
+      if(l.id==='rev'){h+=td(l.id,m,G('adr',m),'$'+G('adr',m).toFixed(2),'imp');continue;}
+      if(!multi&&c0.pf){
+        var isPct=c0.pf==='pct',dp=isPct?1:2;
+        if(m<CLOSED||!live){var iv=(m<CLOSED||live)?implied(l,m):implied(l,m);h+=td(l.id,m,iv,(c0.pf==='rate'?'$':'')+iv.toFixed(dp)+(isPct?'%':''),'imp');}
+        else{var rv=pv(c0,c0.pf,m),ov=c0.ovr&&c0.ovr[m]!=null;
+          h+=td(l.id,m,rv,'<input class="cell'+(ov?' ovr':'')+'" id="g-'+l.id+'-'+m+'" data-l="'+l.id+'" data-m="'+m+'" value="'+rv.toFixed(dp)+'" inputmode="decimal" aria-label="'+esc(l.name)+' '+c0.pf+' for '+MO[m]+'">');}
+      }else{var por=val/G('occ',m);h+=td(l.id,m,por,'$'+por.toFixed(2),'imp');}
+    }
+    if(state.mode==='stat'){var st=0;if(l.stat)for(var q=0;q<12;q++)st+=GS(l,q,sc);h+='<td class="fy">'+(l.stat?fmt(st):'·')+'</td><td></td></tr>';}
+    else h+='<td class="fy">'+fmt(FY(l.id))+'</td>'+varCell(FY(l.id),FY(l.id,CMP()),l.sign)+'</tr>';
+    if(multi&&open&&live){
+      l.comps.forEach(function(c){
+        h+='<tr class="child"><td class="c-name">'+esc(c.label)+(c.origin?' <span class="tag agent">'+esc(c.origin)+'</span>':'')+'</td><td class="c-drv">'+esc(compText(c))+(c.from!=null||c.to!=null?' · '+rangeText(c):'')+'</td>';
+        var t=0;
+        for(var m=0;m<12;m++){var a=state.mode==='stat'?compStat(c,m):compAmt(c,m);if(a!=null&&m<CLOSED&&state.mode!=='stat')a=a*l.noise[m];
+          h+='<td class="'+(m<CLOSED?'a':'')+'">'+(a==null?'·':fmt(a))+'</td>';t+=a||0;}
+        h+='<td class="fy">'+fmt(t)+'</td><td></td></tr>';
+      });
+    }
+  });
+  (state.mode==='stat'?[]:[['trev','Total revenue shown',1],['texp','Rooms expenses shown',-1],['rdp','Rooms profit, lines shown',1]]).forEach(function(t){
+    h+='<tr class="tot"><td class="c-name">'+t[1]+'</td><td class="c-drv"></td>';
+    for(var m=0;m<12;m++)h+=td(t[0],m,G(t[0],m),fmt(G(t[0],m)));
+    h+='<td class="fy">'+fmt(FY(t[0]))+'</td>'+varCell(FY(t[0]),FY(t[0],CMP()),t[2])+'</tr>';
+  });
+  el('grid').innerHTML=h+'</tbody>';
+  el('scenNote').textContent=state.mode==='stat'?'Statistics view: the hours, covers and rooms sold each line produces, written to its paired stat account alongside the dollars.':live?(rate?'Rates view: closed months show the actual rate; a rate typed into one month overrides that month only.':'Amounts view: click any driver chip or line name to edit how it is forecast.'):(sc.follow?sc.label+' is a fork: it follows its source for actuals, the top line feed and every driver it has not changed. Its own changes: '+sc.note+'. In this mockup only the working forecast is editable.':sc.kind==='copy'?sc.label+' is an independent copy of '+sc.src+': it has its own drivers from here on and still takes actuals as months close. In this mockup only the working forecast is editable.':'Snapshot: fully locked. It does not change, even when actuals arrive.');
+}
+function renderKpis(){
+  var sc=cur(),avail=ROOMS*365,o=FY('occ'),r=FY('rev'),e=FY('texp'),bo=FY('occ',CMP()),br=FY('rev',CMP()),be=FY('texp',CMP());
+  function d(v,b,goodUp,f){var x=v-b,g=goodUp?x>=0:x<=0;return '<small class="'+(g?'good':'bad')+'">'+(x>=0?'+':'−')+f(Math.abs(x))+' vs '+esc(CMP().label)+'</small>';}
+  var k=[
+   ['Occupancy',(o/avail*100).toFixed(1)+'%',d(o/avail*100,bo/avail*100,true,function(x){return x.toFixed(1)+' pts';})],
+   ['ADR','$'+(r/o).toFixed(2),d(r/o,br/bo,true,function(x){return '$'+x.toFixed(2);})],
+   ['RevPAR','$'+(r/avail).toFixed(2),d(r/avail,br/avail,true,function(x){return '$'+x.toFixed(2);})],
+   ['Rooms revenue','$'+fmt(r),d(r,br,true,function(x){return '$'+fmt(x);})],
+   ['Rooms expenses shown','$'+fmt(e),d(e,be,false,function(x){return '$'+fmt(x);})],
+   ['Cost per occupied room','$'+(e/o).toFixed(2),d(e/o,be/bo,false,function(x){return '$'+x.toFixed(2);})]
+  ];
+  el('kpis').innerHTML=k.map(function(x){return '<div class="kpi"><span>'+x[0]+'</span><b>'+x[1]+'</b>'+x[2]+'</div>';}).join('');
+}
+function renderCmp(){el('cmpSel').innerHTML=scen.map(function(s){return '<option value="'+s.id+'"'+(s.id===state.cmp?' selected':'')+'>'+esc(s.label)+(s.live||s.dot?' (live)':'')+'</option>';}).join('');el('archBtn').hidden=!cur().custom;}
+function renderPills(){
+  renderCmp();
+  el('pills').innerHTML=scen.map(function(s){
+    return '<button class="pill'+(s.id===state.scen?' on':'')+'" data-scen="'+s.id+'">'+esc(s.label)+(s.live||s.dot?' <i class="dot" title="Live"></i>':'')+(s.live?'':' <span class="lock">'+esc(s.sub)+'</span>')+'</button>';
+  }).join('');
+}
+
+/* ---------- inspector ---------- */
+function txFor(l){
+  if(l.tx)return l.tx;
+  var vs=l.vendors||['Journal entry'];
+  return [0,1,2,3].map(function(i){return {d:'Feb '+('0'+(5+i*6)).slice(-2),v:vs[i%vs.length],ref:'INV-'+(4100+i*37+l.id.length*11),amt:l.actual[1]/4*(1+((i%3)-1)*.06),comp:l.comps[i%l.comps.length].label};});
+}
+function miniChart(l){
+  var vals=MO.map(function(_,m){return G(l.id,m);}),bud=MO.map(function(_,m){return G(l.id,m,CMP());});
+  var mx=Math.max.apply(null,vals.concat(bud))||1,H=64,s='<svg class="mini" viewBox="0 0 336 86" width="100%" role="img" aria-label="Monthly amounts against budget">';
+  vals.forEach(function(v,m){var h=Math.max(1,v/mx*H),x=4+m*28,yb=70-bud[m]/mx*H;
+    s+='<rect class="'+(m<CLOSED?'ba':'bf')+'" x="'+x+'" y="'+(70-h)+'" width="20" height="'+h+'" rx="2"></rect>';
+    s+='<line class="bb" x1="'+(x-2)+'" x2="'+(x+22)+'" y1="'+yb+'" y2="'+yb+'"></line>';
+    s+='<text x="'+(x+10)+'" y="82" text-anchor="middle">'+MO[m][0]+'</text>';});
+  return s+'</svg>';
+}
+function compEditor(l,c,i,live){
+  var dis=live?'':' disabled',f='';
+  function inp(field,val,step){return '<input type="number" step="'+step+'" id="c-'+l.id+'-'+i+'-'+field+'" data-l="'+l.id+'" data-c="'+i+'" data-f="'+field+'" value="'+val+'"'+dis+' aria-label="'+esc(c.label)+' '+field+'">';}
+  if(c.method==='top')f='Occupied rooms × ADR. Edited in the daily top line.';
+  else if(c.method==='unit'){var d=c.driver==='occ'?'Occupied rooms':'Days in month';
+    f=c.ratio!=null? d+' × '+inp('ratio',c.ratio,'0.01')+' '+c.ratioUnit+' × $'+inp('rate',c.rate,'0.05')+c.rateUnit : '$'+inp('rate',c.rate,'0.05')+c.rateUnit;}
+  else if(c.method==='fixed')f='$'+inp('amt',c.amt,'50')+' every month';
+  else if(c.method==='fte')f=inp('fte',c.fte,'0.5')+' FTE × '+inp('hrs',c.hrs,'1')+' hrs a month × $'+inp('rate',c.rate,'0.25')+c.rateUnit;
+  else if(c.method==='pct')f=inp('pct',c.pct,'0.1')+'% of '+c.ofLabel;
+  else if(c.method==='plan')f=c.plan.map(function(a,m){return a?MO[m]+' $'+fmt(a):'';}).filter(Boolean).join(' · ');
+  var fy=0;modded(cur(),function(){for(var m=0;m<12;m++){var a=compAmt(c,m);if(a!=null)fy+=(m<CLOSED?a*l.noise[m]:a);}});
+  var names={top:'Feed',unit:c.ratio!=null?'Stat chain':'Per unit',fixed:'Fixed',fte:'Headcount',pct:'Percent of',plan:'Schedule'};
+  var nov=c.ovr?Object.keys(c.ovr).length:0;
+  return '<div class="comp"><div class="comp-h"><b>'+esc(c.label)+'</b><span class="tag">'+names[c.method]+'</span>'+(c.origin?'<span class="tag agent">'+esc(c.origin)+'</span>':'')+'</div>'+
+    '<div class="comp-f">'+f+'</div><div class="comp-m">'+rangeText(c)+' · FY $'+fmt(fy)+(nov?' · '+nov+' month override'+(nov>1?'s':''):'')+'</div>'+
+    (c.setNode?'<div class="comp-m">Set: '+esc(c.setNode)+' · '+c.of.length+' GL'+(c.of.length>1?'s':'')+' in this hotel: '+c.of.map(function(id){return esc(byId[id].name);}).join(', ')+'</div>':'')+'</div>';
+}
+/* driver fit: today's drivers on the last 12 months of actual volumes, and a fixed-plus-variable fit to compare */
+function fitTargets(l){
+  var u=null,fx=null,ok=true;
+  l.comps.forEach(function(c){
+    if(!inRange(c,CLOSED))return;
+    if(c.method==='unit'&&c.driver==='occ'&&c.ratio==null&&!u)u=c;
+    else if(c.method==='fixed'&&!fx)fx=c;
+    else ok=false;
+  });
+  return ok&&u?{u:u,fx:fx}:null;
+}
+function fitOf(l){
+  var act=l.hist,pred=act.map(function(_,h){return predAt(l,h);}),sa=0,sp=0,se=0,worst=0,wi=0,h;
+  for(h=0;h<12;h++){sa+=act[h];sp+=pred[h];se+=Math.abs(pred[h]-act[h]);var e=act[h]?(pred[h]-act[h])/act[h]:0;if(Math.abs(e)>Math.abs(worst)){worst=e;wi=h;}}
+  var out={act:act,pred:pred,wape:se/sa,bias:(sp-sa)/sa,worst:worst,wi:wi,sug:null,fixedNow:0};
+  var cs=l.comps.filter(function(c){return inRange(c,CLOSED);});
+  cs.forEach(function(c){if(c.method==='fixed')out.fixedNow+=c.amt;if(c.method==='fte')out.fixedNow+=c.fte*c.hrs*c.rate;});
+  var simple=l.sign<0&&cs.every(function(c){return c.method==='fixed'||c.method==='fte'||c.method==='unit';});
+  if(simple){
+    var mx=0,my=0,sxy=0,sxx=0;
+    for(h=0;h<12;h++){mx+=occH[h]/12;my+=act[h]/12;}
+    for(h=0;h<12;h++){sxy+=(occH[h]-mx)*(act[h]-my);sxx+=(occH[h]-mx)*(occH[h]-mx);}
+    var b=sxy/sxx,a=my-b*mx;
+    if(b<0){b=0;a=my;}
+    if(a<0){a=0;b=my/mx;}
+    a=Math.round(a/100)*100;b=Math.round(b*100)/100;
+    var e2=0,sp2=[];for(h=0;h<12;h++){sp2.push(a+b*occH[h]);e2+=Math.abs(sp2[h]-act[h]);}
+    if(out.wape-e2/sa>=.015)out.sug={a:a,b:b,wape:e2/sa,pred:sp2};
+  }
+  return out;
+}
+function fitChart(f){
+  var all=f.act.concat(f.pred,f.sug?f.sug.pred:[]),mx=Math.max.apply(null,all)||1,H=70,W=27.5;
+  function y(v){return 78-v/mx*H;}
+  function pts(a){return a.map(function(v,h){return (4+h*W+9.5).toFixed(1)+','+y(v).toFixed(1);}).join(' ');}
+  var s='<svg class="mini" viewBox="0 0 336 96" width="100%" role="img" aria-label="Actuals against what the drivers would have produced, last 12 months">';
+  f.act.forEach(function(v,h){s+='<rect class="bh" x="'+(4+h*W)+'" y="'+y(v).toFixed(1)+'" width="19" height="'+(78-y(v)).toFixed(1)+'" rx="2"></rect><text x="'+(4+h*W+9.5)+'" y="91" text-anchor="middle">'+MO[HM[h]][0]+'</text>';});
+  if(f.sug)s+='<polyline class="ls" points="'+pts(f.sug.pred)+'"></polyline>';
+  s+='<polyline class="lp" points="'+pts(f.pred)+'"></polyline>';
+  f.pred.forEach(function(v,h){s+='<circle class="dp" cx="'+(4+h*W+9.5).toFixed(1)+'" cy="'+y(v).toFixed(1)+'" r="2.5"></circle>';});
+  return s+'</svg>';
+}
+function pctTxt(v){return (v>=0?'+':'−')+Math.abs(v*100).toFixed(1)+'%';}
+function fitTab(l,live){
+  if(l.id==='rev')return '<div class="comp-m">This line comes from the daily top line. Its accuracy is tracked per locked forecast in forecast accuracy, not as a driver fit.</div>';
+  var f=fitOf(l),h='<div class="comp-m">Today\'s drivers applied to the actual volumes of Mar 2025 to Feb 2026, against what was posted. The error figures are calculated by the engine. Suggestions are written by the forecast agent and scored the same way.</div>';
+  h+='<div class="fitk"><div><span>Average error</span><b>'+(f.wape*100).toFixed(1)+'%</b><small>of actual, last 12 months</small></div>'+
+     '<div><span>Bias</span><b>'+pctTxt(f.bias)+'</b><small>'+(Math.abs(f.bias)<.005?'neither high nor low':f.bias>0?'drivers run high':'drivers run low')+'</small></div>'+
+     '<div><span>Worst month</span><b>'+HLAB[f.wi]+'</b><small>'+pctTxt(f.worst)+'</small></div></div>';
+  h+=fitChart(f)+'<div class="comp-m">Bars are actuals. The solid line is what today\'s drivers would have produced'+(f.sug?'; the dashed line is the suggested split':'')+'.</div>';
+  if(f.sug){
+    var eff=0;for(var m=CLOSED;m<12;m++)eff+=f.sug.a+f.sug.b*occ[m]-calcLine(l,m);
+    var lead=f.sug.a>f.fixedNow*1.15?'More of this line is fixed than the drivers assume.':f.sug.a<f.fixedNow*.85?'Less of this line is fixed than the drivers assume.':'A different rate fits better.';
+    h+='<div class="comp sug"><div class="comp-h"><b>Suggested improvement</b><span class="tag agent">Forecast agent</span></div>'+
+       '<div>'+esc(l.fitWhy||lead)+' Proposed: <b>$'+fmt(f.sug.a)+' a month fixed plus $'+f.sug.b.toFixed(2)+' per occupied room</b>.</div>'+
+       '<div class="comp-m">Scored by the engine on the last 12 months: '+(f.sug.wape*100).toFixed(1)+'% average error, against '+(f.wape*100).toFixed(1)+'% now.</div>'+
+       '<div class="comp-m">Effect on Mar to Dec: '+(eff>=0?'+':'−')+'$'+fmt(Math.abs(eff))+' against the current drivers.</div>'+
+       (live&&fitTargets(l)?'<div><button class="btn" data-fit="apply">Apply to working forecast</button></div>':'<div class="comp-m">'+(live?'This line has several components, so apply the split by hand in Drivers.':'Switch to the working forecast to apply it.')+'</div>')+'</div>';
+  }else{
+    h+='<div class="comp"><b>No change suggested</b><div class="comp-m">'+(f.wape<.03?'The drivers have tracked actuals closely.':'No fixed and per-room split fits materially better. Look at '+HLAB[f.wi]+' in Transactions.')+'</div></div>';
+  }
+  return h;
+}
+function applyFit(l){
+  var f=fitOf(l),t=fitTargets(l);if(!f.sug||!t)return;
+  var was=t.u.rate;t.u.rate=f.sug.b;delete t.u.ovr;
+  if(t.fx)t.fx.amt=f.sug.a;else l.comps.push({label:'Fixed base',method:'fixed',amt:f.sug.a,from:CLOSED,origin:'Fit check'});
+  addLog(l,'You, from the fit check','Split changed to $'+fmt(f.sug.a)+' a month fixed plus $'+f.sug.b.toFixed(2)+' per occupied room (was $'+was.toFixed(2)+' per occupied room). Average error on the last 12 months '+(f.wape*100).toFixed(1)+'% → '+(f.sug.wape*100).toFixed(1)+'%.');
+  state.open[l.id]=true;renderAll();renderAgent();
+}
+function renderInsp(){
+  var box=el('insp'),l=byId[state.sel];
+  if(!l){box.hidden=true;el('work').classList.remove('has-insp');return;}
+  box.hidden=false;el('work').classList.add('has-insp');
+  var live=!!cur().live,h='';
+  h+='<div class="insp-h"><div><h3>'+esc(l.name)+'</h3><small>'+l.acct+' → '+esc(l.usali)+'</small>'+(l.stat?'<small>'+esc(l.stat.unit)+' → '+l.stat.acct+' · '+esc(l.stat.how)+'</small>':'')+'</div><button class="x" data-close="1" aria-label="Close line detail">×</button></div>';
+  h+='<div class="itabs">'+[['drv','Drivers'],['fit','Driver fit'],['tx','Transactions'],['log','Activity']].map(function(t){return '<button data-tab="'+t[0]+'" class="'+(state.tab===t[0]?'on':'')+'">'+t[1]+'</button>';}).join('')+'</div>';
+  if(state.tab==='drv'){
+    h+=miniChart(l)+'<div class="comp-m">Grey bars are actuals, colored bars the forecast, the line is the comparison scenario.</div>';
+    l.comps.forEach(function(c,i){h+=compEditor(l,c,i,live);});
+    var fx=0,vr=0;for(var m=CLOSED;m<12;m++)l.comps.forEach(function(c){var a=compAmt(c,m)||0;if(c.method==='fixed'||c.method==='fte'||c.method==='plan'||c.driver==='days')fx+=a;else vr+=a;});
+    var p=fx+vr?Math.round(fx/(fx+vr)*100):0;
+    h+='<div><div class="fv"><i style="width:'+p+'%"></i><b style="width:'+(100-p)+'%"></b></div><div class="comp-m">'+p+'% fixed · '+(100-p)+'% moves with volume or revenue (remaining months)</div></div>';
+    if(live&&l.id!=='rev')h+='<button class="btn ghost" data-add="'+l.id+'">Add component</button>';
+    h+='<div class="comp-m">Inherited from the Coastal Hospitality standard. Edits here override this hotel only.</div>';
+  }else if(state.tab==='fit'){
+    h+=fitTab(l,live);
+  }else if(state.tab==='tx'){
+    h+='<div class="comp-m">February postings from the ledger sync, matched to components.</div><div class="scroll"><table class="tx"><thead><tr><th>Date</th><th>Vendor</th><th>Ref</th><th class="r">Amount</th><th>Matched to</th></tr></thead><tbody>';
+    var t=0;txFor(l).forEach(function(x){t+=x.amt;h+='<tr class="'+(x.flag?'flag':'')+'"><td>'+x.d+'</td><td>'+esc(x.v)+'</td><td>'+x.ref+'</td><td class="r">'+fmt(x.amt)+'</td><td>'+(x.flag?'<span class="tag agent">Unmatched · agent asked</span>':esc(x.comp))+'</td></tr>';});
+    h+='<tr><td colspan="3"><b>February actual</b></td><td class="r"><b>'+fmt(t)+'</b></td><td></td></tr></tbody></table></div>';
+  }else{
+    h+='<ul class="log">'+l.log.map(function(x){return '<li><b>'+esc(x.who)+'</b><small>'+x.when+'</small>'+esc(x.text)+'</li>';}).join('')+'</ul>';
+  }
+  box.innerHTML=h;
+}
+function renderAll(){renderPills();renderKpis();renderGrid();renderInsp();renderDaily();first=false;}
+
+/* ---------- daily grid ---------- */
+var dayMsg='';
+function renderTopMonth(){
+  var h='<thead><tr><th class="c-name">Top line</th><th class="c-src">Source</th>',o=0,r=0;
+  MO.forEach(function(mo,m){h+='<th class="'+(m<CLOSED?'a':'')+'">'+mo+(m<CLOSED?'<small>actual</small>':'')+'</th>';o+=occ[m];r+=occ[m]*adr[m];});
+  h+='<th>FY 2026</th></tr></thead><tbody>';
+  function row(label,src,fn,tot,cls){h+='<tr class="'+(cls||'')+'"><td class="c-name">'+label+'</td><td class="c-src">'+src+'</td>';for(var m=0;m<12;m++)h+='<td class="'+(m<CLOSED?'a':'')+'">'+fn(m)+'</td>';h+='<td class="fy">'+tot+'</td></tr>';}
+  var src='<span class="tag">Typed, or RMS month total</span>';
+  row('Occupied rooms',src,function(m){return m<CLOSED?fmt(occ[m]):'<input class="cell mon" id="t-occ-'+m+'" data-k="occ" data-m="'+m+'" value="'+Math.round(occ[m])+'" inputmode="numeric" aria-label="Occupied rooms for '+MO[m]+'">';},fmt(o));
+  row('ADR',src,function(m){return m<CLOSED?'$'+adr[m].toFixed(2):'<input class="cell mon" id="t-adr-'+m+'" data-k="adr" data-m="'+m+'" value="'+adr[m].toFixed(2)+'" inputmode="decimal" aria-label="ADR for '+MO[m]+'">';},'$'+(r/o).toFixed(2));
+  row('Occupancy %','',function(m){return (occ[m]/(ROOMS*DAYS[m])*100).toFixed(1);},(o/(ROOMS*365)*100).toFixed(1)+'%');
+  row('RevPAR','',function(m){return '$'+(occ[m]*adr[m]/(ROOMS*DAYS[m])).toFixed(2);},'$'+(r/(ROOMS*365)).toFixed(2));
+  row('Rooms revenue','',function(m){return fmt(occ[m]*adr[m]);},fmt(r),'tot');
+  el('dgrid').innerHTML=h+'</tbody>';
+  el('daynote').innerHTML='<b>Monthly grain.</b> Rooms and ADR are typed by month or filled from RMS month totals, and can be split by major segment. A daily view is spread on read and not stored.'+(dayMsg?' '+dayMsg:'');
+}
+function renderDaily(){
+  var mon=state.grain==='month';
+  el('metricSeg').hidden=mon;el('dayTools').hidden=mon;el('topSub').textContent=mon?'FY 2026 · working forecast':'March 2026 · working forecast';
+  if(mon)return renderTopMonth();
+  var mt=state.metric,h='<thead><tr><th class="c-name">Segment</th><th class="c-src">Source</th>';
+  for(var d=0;d<31;d++){var w=d%7;h+='<th class="'+(d<TODAY?'a ':'')+(w===5||w===6?'we':'')+'">'+DOW[w]+'<br>'+(d+1)+'</th>';}
+  h+='<th>Month</th></tr></thead><tbody>';
+  SEG.forEach(function(s){
+    if(s.grp)h+='<tr class="grp"><td colspan="34">'+s.grp+'</td></tr>';
+    h+='<tr><td class="c-name">'+s.name+'</td><td class="c-src"><span class="tag">'+s.src+'</span></td>';
+    var tr=0,tv=0;
+    for(var d=0;d<31;d++){var r=s.rooms[d],rt=s.rate[d];tr+=r;tv+=r*rt;
+      if(mt==='rooms')h+=d<TODAY?'<td class="a">'+r+'</td>':'<td><input class="cell day" id="d-'+s.id+'-'+d+'" data-s="'+s.id+'" data-d="'+d+'" value="'+r+'" inputmode="numeric" aria-label="'+s.name+' rooms, March '+(d+1)+'"></td>';
+      else h+='<td class="'+(d<TODAY?'a':'')+'">'+(mt==='adr'?rt:(r*rt/1000).toFixed(1))+'</td>';}
+    h+='<td class="fy">'+(mt==='rooms'?fmt(tr):mt==='adr'?'$'+Math.round(tv/tr):fmt(tv/1000)+'k')+'</td></tr>';
+  });
+  function foot(label,fn,tot,cls){h+='<tr class="'+(cls||'')+'"><td class="c-name">'+label+'</td><td class="c-src"></td>';for(var d=0;d<31;d++)h+='<td class="'+(d<TODAY?'a':'')+'">'+fn(d)+'</td>';h+='<td class="fy">'+tot+'</td></tr>';}
+  foot('Total rooms',function(d){return dayTot(d);},fmt(occ[2]),'tot');
+  foot('Occupancy %',function(d){return Math.round(dayTot(d)/ROOMS*100);},(occ[2]/(ROOMS*31)*100).toFixed(1)+'%');
+  foot('On the books today',function(d){return d<TODAY?'·':Math.round(dayTot(d)*Math.max(.35,.92-(d-TODAY)*.035));},'');
+  foot('RMS forecast',function(d){return d<TODAY?'·':Math.round(dayTot(d)*(1+(((d*13)%7)-3)/100));},'');
+  foot('ADR',function(d){return Math.round(dayRev(d)/dayTot(d));},'$'+adr[2].toFixed(2));
+  el('dgrid').innerHTML=h+'</tbody>';
+  el('daynote').innerHTML='<b>March: '+fmt(occ[2])+' occupied rooms at $'+adr[2].toFixed(2)+'.</b> These totals drive '+LINES.filter(function(l){return l.comps.some(function(c){return c.driver==='occ'||c.method==='pct'||c.method==='top';});}).length+' lines in the forecast workspace.'+(dayMsg?' '+dayMsg:'');
+}
+
+/* ---------- agent screen ---------- */
+var ag={gs:'open',q:'open',auto:'on',linen:'open'};
+function restOcc(from){var s=0;for(var m=from;m<12;m++)s+=occ[m];return s;}
+function renderAgent(){
+  var gsImp=(5.10-4.85)*restOcc(CLOSED),h='<h3>Suggestions</h3>';
+  h+='<div class="card"><div class="row"><span class="tag agent">Suggest</span><b>Guest supplies are running above the driver</b></div>'+
+     '<p>Actual cost has been $5.07 to $5.14 per occupied room for three months against a $4.85 driver. Two vendors raised their price lists in December; usage per room is flat.</p>'+
+     '<p class="ev">Evidence: 14 invoices from Seaboard Hospitality Supply and Northline Paper, Dec to Feb · Proposed: $5.10 per occupied room from March · Impact: +$'+fmt(gsImp)+' for Mar to Dec</p>'+
+     (ag.gs==='open'?'<div class="row"><button class="btn" data-act="gs-apply">Apply</button><button class="btn quiet" data-act="gs-dismiss">Dismiss</button></div>':
+      ag.gs==='applied'?'<div class="row"><span class="state">Applied to the working forecast</span><button class="btn quiet" data-act="gs-undo">Undo</button></div>':'<div class="row"><span class="ev">Dismissed. The agent will not raise this again unless the gap widens.</span></div>')+'</div>';
+  h+='<div class="card"><div class="row"><span class="tag agent">Ask</span><b>Extra linen invoice in February</b></div>'+
+     '<p>Crisp Linen invoice CL-88214 for $1,940 posted on Feb 22, on top of the usual weekly billing. Is this a new recurring service or a one-time charge?</p>'+
+     '<p class="ev">Sent to the Director of Rooms through Scout · Laundry is $1,940 over forecast for February</p>'+
+     (ag.q==='open'?'<div class="row"><button class="btn" data-act="q-once">One-time</button><button class="btn quiet" data-act="q-recur">Recurring</button></div>':
+      ag.q==='once'?'<div class="row"><span class="state">Recorded as one-time. Drivers unchanged; the invoice is excluded from run-rate checks and the answer is saved as the variance comment.</span></div>':
+      '<div class="row"><span class="state">Added component "Extra linen pickup", $1,940 a month from March.</span></div>')+'</div>';
+  h+='<div class="card"><div class="row"><span class="tag agent">Autopilot</span><b>Electricity tariff up 3.2%</b></div>'+
+     '<p>The February bill shows a new tariff. The rate on the electricity line was raised from March.</p>'+
+     '<p class="ev">Impact $410 a month, under this hotel\'s $500 autopilot limit · Evidence: bill dated Feb 26</p>'+
+     (ag.auto==='on'?'<div class="row"><span class="state">Applied automatically</span><button class="btn quiet" data-act="auto-undo">Undo</button></div>':'<div class="row"><span class="ev">Reverted. Moved to suggestions for review.</span></div>')+'</div>';
+  var fo=fitOf(byId.ops);
+  h+='<div class="card"><div class="row"><span class="tag agent">Suggest</span><b>Operating supplies is more fixed than its drivers say</b></div>'+
+     '<p>'+esc(byId.ops.fitWhy)+'</p>'+
+     (fo.sug?'<p class="ev">Proposed: $'+fmt(fo.sug.a)+' a month fixed plus $'+fo.sug.b.toFixed(2)+' per occupied room · Engine score on the last 12 months: '+(fo.sug.wape*100).toFixed(1)+'% average error, against '+(fo.wape*100).toFixed(1)+'% now · Also shown on the line\'s Driver fit tab</p><div class="row"><button class="btn" data-act="ops-apply">Apply</button></div>'
+            :'<div class="row"><span class="state">Applied. Average error on the last 12 months is now '+(fo.wape*100).toFixed(1)+'%.</span></div>')+'</div>';
+  h+='<div class="card"><div class="row"><b>Policy by account</b><span class="ev">set by the hotel controller, inherited from the operator standard</span></div><div class="scroll"><table class="tx"><thead><tr><th>Account</th><th>Mode</th><th>Limit</th></tr></thead><tbody>'+
+     '<tr><td>Utilities</td><td>Autopilot</td><td>Up to $500 a month, rate changes only</td></tr>'+
+     '<tr><td>Guest and operating supplies</td><td>Suggest</td><td>Any size, needs approval</td></tr>'+
+     '<tr><td>Laundry, contract services</td><td>Ask the line owner</td><td>Question first, then suggest</td></tr>'+
+     '<tr><td>All wage lines</td><td>Off</td><td>Agent reports, never proposes</td></tr>'+
+     '<tr><td>Everything else</td><td>Suggest</td><td>Operator default</td></tr></tbody></table></div></div>';
+  el('inbox').innerHTML=h;
+
+  var d=0;for(var m=5;m<12;m++)d+=occ[m]*.28;
+  var c='<h3>Conversation</h3>';
+  c+='<div class="msg user">Update the forecast to reflect the new pricing for laundry services effective June 1st.</div>';
+  c+='<div class="msg bot"><p>I found the change in Contracts: Crisp Linen Master Services, amendment 2, signed Feb 19. Linen service moves from $2.10 to $2.38 per occupied room on June 1, with a 3% escalator each June after that. Dry cleaning and uniforms are not affected.</p>'+
+     '<div class="scroll"><table><thead><tr><th>Component</th><th>Driver</th><th>Dates</th></tr></thead><tbody>'+
+     '<tr><td>Linen service · Crisp Linen</td><td>$2.10 per occ room</td><td>All year → through May 31</td></tr>'+
+     '<tr><td>Linen service · amendment 2</td><td>$2.38 per occ room</td><td>New, from Jun 1</td></tr></tbody></table></div>'+
+     '<p>Impact on Laundry and dry cleaning: <b>+$'+fmt(d)+'</b> for June to December. The locked Forecast 2 does not change.</p>'+
+     (ag.linen==='open'?'<div class="row" style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn" data-act="linen-apply">Apply to working forecast</button><button class="btn quiet" data-act="linen-whatif">Preview as what-if</button></div>':'')+'</div>';
+  if(ag.linen==='whatif')c+='<div class="msg bot"><p>What-if "Linen repricing" created. Rooms profit is $'+fmt(d)+' lower than the working forecast for the year. Nothing has been applied.</p><div><button class="btn" data-act="linen-apply">Apply to working forecast</button></div></div>';
+  if(ag.linen==='applied')c+='<div class="msg bot"><p>Applied. The linen component now ends May 31 and a new one starts June 1 at $2.38. Laundry and dry cleaning for the year is $'+fmt(FY('ldy',scen[0]))+'. The change is logged with the contract clause as evidence, and the 2027 escalator is set for next June.</p></div>';
+  el('chat').innerHTML=c;
+}
+function act(a){
+  var gs=byId.gs,l=byId.ldy;
+  if(a==='gs-apply'){gs.comps[0].rate=5.1;addLog(gs,'Forecast agent, approved by you','Rate $4.85 → $5.10 per occupied room from March. Evidence: 14 invoices, Dec to Feb.');ag.gs='applied';}
+  if(a==='gs-undo'){gs.comps[0].rate=4.85;addLog(gs,'You','Reverted the agent change. Rate back to $4.85.');ag.gs='open';}
+  if(a==='gs-dismiss')ag.gs='dismissed';
+  if(a==='q-once'){addLog(l,'Director of Rooms, via Scout','CL-88214 confirmed one-time. No driver change.');ag.q='once';}
+  if(a==='q-recur'){l.comps.push({label:'Extra linen pickup',method:'fixed',amt:1940,from:CLOSED,origin:'Agent · answered'});addLog(l,'Forecast agent','Added "Extra linen pickup", $1,940 a month from March, after the Director of Rooms confirmed it recurs.');ag.q='recur';}
+  if(a==='auto-undo')ag.auto='off';
+  if(a==='ops-apply')applyFit(byId.ops);
+  if(a==='linen-whatif')ag.linen='whatif';
+  if(a==='linen-apply'){var c0=l.comps[0];if(c0.to==null){c0.to=4;l.comps.splice(1,0,{label:'Linen service · amendment 2',method:'unit',driver:'occ',rate:2.38,rateUnit:' per occ room',from:5,origin:'Agent · contract'});
+    addLog(l,'Forecast agent, approved by you','Linen rate $2.10 → $2.38 from June 1. Evidence: Crisp Linen amendment 2.');}ag.linen='applied';state.open.ldy=true;}
+  renderAll();renderAgent();
+}
+
+/* ---------- chart of accounts (hotel view) ---------- */
+var COA=[
+ {a:'CHG-100-601200',d:'Front desk wages',t:'Rooms · Salaries, wages and bonuses',last:'Feb 2026',t12:489120,on:true,drv:'2 components'},
+ {a:'CHG-100-601400',d:'Housekeeping wages',t:'Rooms · Salaries, wages and bonuses',last:'Feb 2026',t12:902340,on:true,drv:'2 components'},
+ {a:'CHG-100-612100',d:'Guest supplies',t:'Rooms · Other expenses',last:'Feb 2026',t12:421880,on:true,drv:'$4.85 per occ room'},
+ {a:'CHG-100-612950',d:'Guest relocation',t:'Rooms · Other expenses',last:'Feb 2026',t12:2140,on:false,flag:'Actuals posted in February to an account that is off.',drv:'Operator standard: fixed amount'},
+ {a:'CHG-100-613400',d:'Valet outsourcing',t:'Rooms · Other expenses',last:'No actuals yet',t12:0,on:true,from:'Jun 2026',note:'New at this hotel. Enabled ahead of the contract start.',drv:'$3.10 per occ room'},
+ {a:'CHG-100-612700',d:'Guest transportation',t:'Rooms · Other expenses',last:'Never used here',t12:0,on:false,note:'On the operator chart; used at 14 other hotels.',drv:'Operator standard: per occ room'},
+ {a:'CHG-100-611900',d:'Newspapers',t:'Rooms · Other expenses',last:'Aug 2024',t12:0,on:false,note:'Turned off from Jan 2025.',drv:'Fixed amount'},
+ {a:'CHG-100-619800',d:'Rooms suspense',t:'Unmapped',last:'Feb 2026',t12:310,on:false,flag:'Not mapped to a Singlepane line. Map it before enabling.',na:true,drv:'·'},
+ {a:'CHG-000-120400',d:'Prepaid expenses',t:'Balance sheet',last:'Feb 2026',t12:0,on:false,note:'Not a P&L account, so it cannot be forecast.',na:true,drv:'·'}
+];
+var coaFilter='all';
+var COAF={all:function(){return true;},on:function(r){return r.on;},off:function(r){return !r.on;},att:function(r){return !!r.flag&&!r.on;}};
+function renderCoa(){
+  el('coaSeg').innerHTML=[['all','All'],['on','Enabled'],['off','Off'],['att','Needs attention']].map(function(x){
+    return '<button data-f="'+x[0]+'" class="'+(coaFilter===x[0]?'on':'')+'">'+x[1]+' '+COA.filter(COAF[x[0]]).length+'</button>';}).join('');
+  var h='<thead><tr><th class="c-name">Account</th><th class="c-drv">Type, from its USALI</th><th class="c-drv">Last actual</th><th>Trailing 12</th><th class="c-drv">Driver when enabled</th><th class="c-drv">Forecast and budget</th><th class="c-note">Note</th></tr></thead><tbody>';
+  COA.filter(COAF[coaFilter]).forEach(function(r){
+    var att=r.flag&&!r.on;
+    h+='<tr><td class="c-name"><b>'+esc(r.d)+'</b><br><span class="comp-m">'+r.a+'</span></td><td class="c-drv">'+esc(r.t)+'</td><td class="c-drv">'+esc(r.last)+'</td><td>'+(r.t12?'$'+fmt(r.t12):'·')+'</td><td class="c-drv">'+esc(r.drv)+'</td><td class="c-drv">'+
+       (r.na?'<span class="tag">Not available</span>':'<button class="btn'+(r.on?'':' quiet')+'" data-coa="'+COA.indexOf(r)+'">'+(r.on?'On'+(r.from?' from '+r.from:''):'Off')+'</button>')+
+       '</td><td class="c-note">'+(att?'<span class="tag agent">Needs attention</span> ':'')+esc(att?r.flag:(r.note||''))+'</td></tr>';
+  });
+  el('coaGrid').innerHTML=h+'</tbody>';
+  el('coaCount').textContent=COA.filter(COAF.on).length+' of these '+COA.length+' accounts enabled';
+}
+/* ---------- events ---------- */
+el('coaSeg').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;coaFilter=b.dataset.f;renderCoa();});
+el('coaGrid').addEventListener('click',function(e){
+  var b=e.target.closest('button');if(!b||b.dataset.coa==null)return;
+  var r=COA[+b.dataset.coa];r.on=!r.on;
+  if(r.on){r.from='Mar 2026';r.note='Enabled from Mar 2026. Line created from the operator standard.';}
+  else{delete r.from;r.note='Turned off from Mar 2026. History and locked forecasts keep it.';}
+  renderCoa();
+});
+function showScreen(s){['fw','daily','ag','coa'].forEach(function(k){el('screen-'+k).hidden=k!==s;});
+  Array.prototype.forEach.call(el('screenSeg').children,function(b){b.classList.toggle('on',b.dataset.screen===s);});}
+function showSec(s){var ok=false;Array.prototype.forEach.call(el('nav').children,function(b){var on=b.dataset.sec===s;if(on)ok=true;});
+  if(!ok)s='screens';
+  Array.prototype.forEach.call(el('nav').children,function(b){b.classList.toggle('on',b.dataset.sec===s);el('sec-'+b.dataset.sec).hidden=b.dataset.sec!==s;});}
+el('nav').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;showSec(b.dataset.sec);try{history.replaceState(null,'','#'+b.dataset.sec);}catch(x){location.hash=b.dataset.sec;}});
+window.addEventListener('hashchange',function(){showSec(location.hash.slice(1));});
+el('screenSeg').addEventListener('click',function(e){var b=e.target.closest('button');if(b)showScreen(b.dataset.screen);});
+el('modeSeg').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;state.mode=b.dataset.mode;
+  Array.prototype.forEach.call(el('modeSeg').children,function(x){x.classList.toggle('on',x===b);});first=true;renderGrid();first=false;});
+el('metricSeg').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;state.metric=b.dataset.metric;
+  Array.prototype.forEach.call(el('metricSeg').children,function(x){x.classList.toggle('on',x===b);});renderDaily();});
+el('pills').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;state.scen=b.dataset.scen;first=true;renderAll();});
+var revNo=1,scenSeq=0;
+function customCount(){return scen.filter(function(s){return s.custom;}).length;}
+function lockMsg(full){
+  var src=cur().label,t=el('scenType').value||'snap';
+  el('lockMsg').textContent=full?'This hotel already has 5 custom scenarios. Archive one to save another.':
+    (t==='fork'?'A fork follows '+src+': it keeps only its own changes and reads everything else from it.':
+     t==='copy'?'A copy has its own drivers and no longer follows '+src+'. It still takes actuals as months close.':
+     'A snapshot is fully locked and does not change, even when actuals arrive. From the working forecast, an official name such as Forecast 2.1 publishes as forecastN.M.')+
+    ' Custom scenarios used: '+customCount()+' of 5.';
+}
+function newScen(src,type,name,official){
+  var s={id:'s'+(++scenSeq),label:name,custom:!official};
+  if(type==='fork'){
+    if(src.live||src.mods){s.mods=(src.mods||[]).map(function(x){return {months:x.months.slice(),pct:x.pct};});s.follow=true;s.dot=true;s.note=src.mods?'none of its own yet, on top of those in '+src.label:'none yet';}
+    else s.data=src.data;
+    s.sub='fork of '+src.label;
+  }else if(type==='copy'){s.data=snap(src);s.dot=true;s.kind='copy';s.src=src.label;s.sub='copy of '+src.label;}
+  else{s.data=snap(src);s.sub=(official?'':'custom · ')+'snapshot, just now';}
+  return s;
+}
+el('lockBtn').addEventListener('click',function(){
+  var src=cur();el('lockSrc').textContent='Save '+src.label+' as';
+  el('scenName').value=src.live?'Forecast 2.'+revNo:src.label+' 2';lockMsg(false);el('lockForm').hidden=false;
+});
+el('scenType').addEventListener('change',function(){lockMsg(false);});
+el('archBtn').addEventListener('click',function(){
+  var sc=cur();if(!sc.custom)return;
+  scen.splice(scen.indexOf(sc),1);if(state.cmp===sc.id)state.cmp='bud';state.scen='work';first=true;renderAll();
+});
+el('lockCancel').addEventListener('click',function(){el('lockForm').hidden=true;});
+el('lockSave').addEventListener('click',function(){
+  var name=String(el('scenName').value||'').trim();if(!name)return;
+  var src=cur(),type=el('scenType').value||'snap',official=type==='snap'&&!!src.live&&/^Forecast \d+(\.\d+)?$/i.test(name);
+  if(!official&&customCount()>=5){lockMsg(true);return;}
+  if(official)revNo++;
+  scen.splice(1,0,newScen(src,type,name,official));
+  el('lockForm').hidden=true;renderPills();
+});
+el('cmpSel').addEventListener('change',function(e){state.cmp=e.target.value;first=true;renderAll();});
+el('grainSeg').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;state.grain=b.dataset.grain;
+  Array.prototype.forEach.call(el('grainSeg').children,function(x){x.classList.toggle('on',x===b);});dayMsg='';renderDaily();});
+el('grid').addEventListener('click',function(e){
+  var b=e.target.closest('button');if(!b)return;
+  if(b.dataset.go){showScreen('daily');return;}
+  if(b.dataset.tog){state.open[b.dataset.tog]=!state.open[b.dataset.tog];first=true;renderGrid();first=false;return;}
+  if(b.dataset.sel){state.sel=b.dataset.sel;state.tab='drv';first=true;renderGrid();first=false;renderInsp();}
+});
+el('grid').addEventListener('change',function(e){
+  var t=e.target;if(!t.classList.contains('cell'))return;
+  var l=byId[t.dataset.l],c=l.comps[0],m=+t.dataset.m,v=parseFloat(t.value);if(isNaN(v)||v<0)return renderGrid();
+  c.ovr=c.ovr||{};c.ovr[m]=v;addLog(l,'You',MO[m]+' '+c.pf+' set to '+v+' for that month only.');renderAll();
+});
+el('insp').addEventListener('click',function(e){
+  var b=e.target.closest('button');if(!b)return;
+  if(b.dataset.close){state.sel=null;renderInsp();first=true;renderGrid();first=false;return;}
+  if(b.dataset.tab){state.tab=b.dataset.tab;renderInsp();return;}
+  if(b.dataset.fit){applyFit(byId[state.sel]);return;}
+  if(b.dataset.add){var l=byId[b.dataset.add];l.comps.push({label:'New fixed item',method:'fixed',amt:500,from:CLOSED});state.open[l.id]=true;addLog(l,'You','Added a fixed component, $500 a month from March.');renderAll();}
+});
+el('insp').addEventListener('change',function(e){
+  var t=e.target;if(t.tagName!=='INPUT')return;
+  var l=byId[t.dataset.l],c=l.comps[+t.dataset.c],f=t.dataset.f,v=parseFloat(t.value);if(isNaN(v)||v<0)return renderInsp();
+  var old=c[f];c[f]=v;addLog(l,'You',c.label+': '+f+' '+old+' → '+v+'.');renderAll();
+});
+el('dgrid').addEventListener('change',function(e){
+  var t=e.target;
+  if(t.classList.contains('mon')){
+    var mm=+t.dataset.m,mv=parseFloat(t.value);if(isNaN(mv)||mv<0)return renderDaily();
+    var b4=G('texp',mm,scen[0]),isOcc=t.dataset.k==='occ';
+    if(isOcc)occ[mm]=Math.min(Math.round(mv),ROOMS*DAYS[mm]);else adr[mm]=mv;
+    dayMsg='Last change: '+MO[mm]+' '+(isOcc?'occupied rooms':'ADR')+' updated; '+MO[mm]+' rooms expenses $'+fmt(b4)+' → $'+fmt(G('texp',mm,scen[0]))+'.';
+    renderAll();renderAgent();return;
+  }
+  if(!t.classList.contains('day'))return;
+  var s=SEG.filter(function(x){return x.id===t.dataset.s;})[0],d=+t.dataset.d,v=parseInt(t.value,10);
+  if(isNaN(v)||v<0)return renderDaily();
+  var room=ROOMS-(dayTot(d)-s.rooms[d]);v=Math.min(v,room);
+  var before=G('texp',2,scen[0]),o=occ[2];s.rooms[d]=v;syncMarch();
+  var after=G('texp',2,scen[0]);
+  dayMsg='Last change: March rooms '+fmt(o)+' → '+fmt(occ[2])+'; March rooms expenses $'+fmt(before)+' → $'+fmt(after)+'.';
+  renderAll();renderAgent();
+});
+el('inbox').addEventListener('click',function(e){var b=e.target.closest('button');if(b&&b.dataset.act)act(b.dataset.act);});
+el('chat').addEventListener('click',function(e){var b=e.target.closest('button');if(b&&b.dataset.act)act(b.dataset.act);});
+
+renderAll();renderAgent();
+renderCoa();
+if(location.hash.length>1)showSec(location.hash.slice(1));
+})();
+</script>
